@@ -28,7 +28,6 @@ import com.google.android.libraries.places.api.net.PlacesClient;
 
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
-//   new branch
     private static final String TAG = MapsActivity.class.getSimpleName();
     private GoogleMap mMap;
     private CameraPosition mCameraPosition;
@@ -44,9 +43,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     // A default location (Sydney, Australia) and default zoom to use when location permission is
     // not granted.
     private final LatLng mDefaultLocation = new LatLng(-33.8523341, 151.2106085);
-    private static final int DEFAULT_ZOOM = 15;
     private boolean mLocationPermissionGranted;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
+    private static final float DEFAULT_ZOOM = 10.0f;
 
 
     @Override
@@ -59,6 +58,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         setContentView(R.layout.activity_maps);
 
+
         // Construct a PlacesClient
         Places.initialize(getApplicationContext(), getString(R.string.google_maps_key));
         mPlacesClient = Places.createClient(this);
@@ -70,6 +70,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
 
 
     }
@@ -100,6 +101,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         googleMap.setMapStyle(new MapStyleOptions(getResources().getString(R.string.style1)));
+        googleMap.getUiSettings().setAllGesturesEnabled(false);
+
+
 
         // Prompt the user for permission.
         getLocationPermission();
@@ -109,7 +113,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         // Get the current location of the device and set the position of the map.
         getDeviceLocation();
-
 
         /*
         // Add a marker in Sydney and move the camera
@@ -207,6 +210,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             if (mLocationPermissionGranted) {
                 mMap.setMyLocationEnabled(true);
                 mMap.getUiSettings().setMyLocationButtonEnabled(true);
+
             } else {
                 mMap.setMyLocationEnabled(false);
                 mMap.getUiSettings().setMyLocationButtonEnabled(false);
