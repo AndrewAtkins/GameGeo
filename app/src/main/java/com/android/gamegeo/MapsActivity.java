@@ -27,7 +27,7 @@ import com.google.android.libraries.places.api.net.PlacesClient;
 
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
-
+//   new branch
     private static final String TAG = MapsActivity.class.getSimpleName();
     private GoogleMap mMap;
     private CameraPosition mCameraPosition;
