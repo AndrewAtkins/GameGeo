@@ -43,9 +43,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     // A default location (Sydney, Australia) and default zoom to use when location permission is
     // not granted.
     private final LatLng mDefaultLocation = new LatLng(-33.8523341, 151.2106085);
+    private static final int DEFAULT_ZOOM = 18;
     private boolean mLocationPermissionGranted;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
-    private static final float DEFAULT_ZOOM = 10.0f;
 
 
     @Override
@@ -101,8 +101,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         googleMap.setMapStyle(new MapStyleOptions(getResources().getString(R.string.style1)));
-        googleMap.getUiSettings().setAllGesturesEnabled(false);
-
 
 
         // Prompt the user for permission.
@@ -113,6 +111,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         // Get the current location of the device and set the position of the map.
         getDeviceLocation();
+
+        // Set properties of the map such as disabling panning
+        setMapProperties();
+
 
         /*
         // Add a marker in Sydney and move the camera
@@ -220,6 +222,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         } catch (SecurityException e) {
             Log.e("Exception: %s", e.getMessage());
         }
+    }
+
+    /**
+     * Sets properties of the map that we will always want such as not being able to pan and not being able to zoom out very far
+     * */
+    private void setMapProperties() {
+//        mMap.getUiSettings().setScrollGesturesEnabled(false);
+        mMap.setMaxZoomPreference(20);
+        mMap.setMinZoomPreference(15);
+
     }
 
 
