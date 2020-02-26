@@ -1,5 +1,8 @@
 package com.android.gamegeo;
 
+import android.app.Activity;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -38,7 +41,13 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.net.PlacesClient;
 
+import android.app.AlertDialog;
+
+import androidx.fragment.app.FragmentManager;
+
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -73,7 +82,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     /*
         Challenge variables. This array will be populated with challenges pulled from the DB.
      */
-    private ArrayList<Challenge> challenges = new ArrayList<Challenge>() ;
+    private HashMap<String, Challenge> challenges = new HashMap<>() ;
 
 
     @Override
@@ -97,8 +106,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         /*
             Here we will need to call the database and populate the challenges array
          */
-        challenges.add(new PictionaryChallenge("iVBORw0KGgoAAAANSUhEUgAAAH0AAABKCAIAAAAZncxnAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAASdAAAEnQB3mYfeAAABAZJREFUeF7tmr9S3DAQh32pqFPBTDJDkfQ8AnT3CFdSQnf9FXQwPAF00FJRcu/CUKWAJmmhu/wmu6MYj/9IWkkr2/rmJpF1F0v7aW8t+7LY7XZVITlf+O9CWop3HXTqzJ/vP7nVxtdfz9yaLum81133m+1flTrjXaHo3o3EGI66Vij/9YjonaSoKMh/PcJ7j5rgQhRToUFI7/lE1U8O8wzmfSzSDboTDrl/H5F0QLMl++kJ4x2zH5d0QnHOAbxrpUwQoB7zTx9CmHwfY7IbVCYv9T7SCqNOyOvqeKFqwwdJyMX7w8PD5eUlH8yAXLy/vLxsNhs+mAHS+6bJ1HeqM8limUh9l5cpMp6syrvle+u0csh3SEeZkj/zsPEeJF5b72ZCjVHRn4P3UAyGQx7kIQ/UGQxDL4xEL35jrpABsi+h0zvpRmNWuhHpoNMg6lu8z9O4E3It7fk+Z+MI3CaXLT/WxUT2kVp4q296x4lmm+kG+5Tnljsl33Uo3nUo3nUo3nUo3tsRbhMHKd51mL737XZ7cnJyf3/Px5mw+8zvbz+4ZYfr59Ozv7+PMPf29vjYGpvQvMNvyXfUNXrx8Zi5vb19e3tD4+Pjg3pygf23gcWsv7j3M139PTw9PR0fH9/d3fFxTCjZwWq14i5rBkPr0TKIw+9NXd8A19vlg4MD5CC++O/v79wVjcViQQ2MhRGpbQni7QrNqPB+VKDwu7ZxIRx6EBSZ8/NzanuM1VNpvXX/BxOS4PFF44HFQw8iKTLAu4bYMOV8FxYZ/BkgrzuYxX2Tq3QinnRQ7lebINN7KnsopN6RFN6zjHoPSdt2PxBU1GQHCvluvvVmsxGD6+trahwdHVHDBo/LlSf/rq4iXK/7V1dXPHZVXVxccG9ozGbm8fGRu3qR3AR5oOAdrNdrkgIiqeez2yVWSuOEjnds7JbLJYuJoP719ZVPPWHvQK7+8PAw4BObs7MzOi2KO3f1MiPvoKEe11t+Q8bNzQ2f0a64p5cOwngH3upPT09ZUlXhkstv+IIKY/ZLWFTu7WWO3glzmYUyZCv3emFOhQqDReXeblSkgyy8Q1D9Vl5ymfXYPnIrLcG8A0kM9U098FbP/976vmQi3oVZL9zhuG4fwRS8E2TfL56GeuBkP//toyG8d4O3+voOh7Cxj9LEn86+uIOI3gElvkd4jXLvRM7bR0Nc74SfeuBhH9IHt480n+l7J7zjtLe/Wq0GpQNd44T091UnzC8kiZ5xt5HuCXsvSb0b0gefw5LX0fEOjAgQ20UmOV5HzXudqF4ylA6y8A6Cp785YYbSQS7e60jWIHPdhhy9G0iipUGnD6uTtXeinv49jMU4MQLvk6T8Pz0dincdincdincNquovAPNgdJ320sgAAAAASUVORK5CYII=",
-                "Face",30.342330, -87.096400));
+        PictionaryChallenge testchallenge = new PictionaryChallenge("iVBORw0KGgoAAAANSUhEUgAAAH0AAABKCAIAAAAZncxnAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAASdAAAEnQB3mYfeAAABAZJREFUeF7tmr9S3DAQh32pqFPBTDJDkfQ8AnT3CFdSQnf9FXQwPAF00FJRcu/CUKWAJmmhu/wmu6MYj/9IWkkr2/rmJpF1F0v7aW8t+7LY7XZVITlf+O9CWop3HXTqzJ/vP7nVxtdfz9yaLum81133m+1flTrjXaHo3o3EGI66Vij/9YjonaSoKMh/PcJ7j5rgQhRToUFI7/lE1U8O8wzmfSzSDboTDrl/H5F0QLMl++kJ4x2zH5d0QnHOAbxrpUwQoB7zTx9CmHwfY7IbVCYv9T7SCqNOyOvqeKFqwwdJyMX7w8PD5eUlH8yAXLy/vLxsNhs+mAHS+6bJ1HeqM8limUh9l5cpMp6syrvle+u0csh3SEeZkj/zsPEeJF5b72ZCjVHRn4P3UAyGQx7kIQ/UGQxDL4xEL35jrpABsi+h0zvpRmNWuhHpoNMg6lu8z9O4E3It7fk+Z+MI3CaXLT/WxUT2kVp4q296x4lmm+kG+5Tnljsl33Uo3nUo3nUo3nUo3tsRbhMHKd51mL737XZ7cnJyf3/Px5mw+8zvbz+4ZYfr59Ozv7+PMPf29vjYGpvQvMNvyXfUNXrx8Zi5vb19e3tD4+Pjg3pygf23gcWsv7j3M139PTw9PR0fH9/d3fFxTCjZwWq14i5rBkPr0TKIw+9NXd8A19vlg4MD5CC++O/v79wVjcViQQ2MhRGpbQni7QrNqPB+VKDwu7ZxIRx6EBSZ8/NzanuM1VNpvXX/BxOS4PFF44HFQw8iKTLAu4bYMOV8FxYZ/BkgrzuYxX2Tq3QinnRQ7lebINN7KnsopN6RFN6zjHoPSdt2PxBU1GQHCvluvvVmsxGD6+trahwdHVHDBo/LlSf/rq4iXK/7V1dXPHZVXVxccG9ozGbm8fGRu3qR3AR5oOAdrNdrkgIiqeez2yVWSuOEjnds7JbLJYuJoP719ZVPPWHvQK7+8PAw4BObs7MzOi2KO3f1MiPvoKEe11t+Q8bNzQ2f0a64p5cOwngH3upPT09ZUlXhkstv+IIKY/ZLWFTu7WWO3glzmYUyZCv3emFOhQqDReXeblSkgyy8Q1D9Vl5ymfXYPnIrLcG8A0kM9U098FbP/976vmQi3oVZL9zhuG4fwRS8E2TfL56GeuBkP//toyG8d4O3+voOh7Cxj9LEn86+uIOI3gElvkd4jXLvRM7bR0Nc74SfeuBhH9IHt480n+l7J7zjtLe/Wq0GpQNd44T091UnzC8kiZ5xt5HuCXsvSb0b0gefw5LX0fEOjAgQ20UmOV5HzXudqF4ylA6y8A6Cp785YYbSQS7e60jWIHPdhhy9G0iipUGnD6uTtXeinv49jMU4MQLvk6T8Pz0dincdincdincNquovAPNgdJ320sgAAAAASUVORK5CYII=",
+                "Face",30.342330, -87.096400, "999");
+        challenges.put(testchallenge.getId(), testchallenge);
 
         // Build the Map
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -153,6 +163,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             public boolean onMarkerClick(Marker marker) {
 
                 if(marker.getTitle().contains("Pictionary")) {
+                    String markerId = (String)marker.getTag();
+                    PictionaryChallenge pc = (PictionaryChallenge)challenges.get(markerId);
+                    // launch a pictionary guessing preview and pass in the data from the challenge
+                    // pass in data of pictionary marker
+                    Bundle bundle = new Bundle();
+                    bundle.putString("activity_type", "Pictionary");
+                    bundle.putString("image", pc.getImage());
+                    bundle.putString("secret_word", pc.getSecretWord());
+
+                    FragmentManager fm = getSupportFragmentManager();
+                    ChallengeDialog dialog = new ChallengeDialog();
+                    dialog.setArguments(bundle);
+                    dialog.show(fm, "Pictionary");
+
                     return true;
                 }
                 return true;
@@ -349,12 +373,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void createMarkers() {
-        for(Challenge c: challenges) {
-            LatLng challenge = new LatLng(c.getLatitude(), c.getLongitude());
-            mMap.addMarker(new MarkerOptions().position(challenge)
+//        for(Challenge c: challenges) {
+//            LatLng challenge = new LatLng(c.getLatitude(), c.getLongitude());
+//            Marker m = mMap.addMarker(new MarkerOptions().position(challenge)
+//                    .title("Marker for a Pictionary Challenge"));
+//            m.setTag(c.getId());
+//        }
+        for(Map.Entry c : challenges.entrySet()){
+            Challenge challenge = (Challenge) c.getValue();
+            LatLng cLatLong = new LatLng(challenge.getLatitude(), challenge.getLongitude());
+            Marker m = mMap.addMarker(new MarkerOptions().position(cLatLong)
                     .title("Marker for a Pictionary Challenge"));
+            m.setTag(challenge.getId());
         }
     }
-
-
 }

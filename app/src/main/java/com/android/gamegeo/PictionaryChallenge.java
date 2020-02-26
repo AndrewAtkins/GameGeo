@@ -4,8 +4,8 @@ public class PictionaryChallenge extends Challenge {
     private String image;
     private String secretWord;
 
-    public PictionaryChallenge(String image, String secretWord, double latitude, double longitude) {
-        super(latitude, longitude);
+    public PictionaryChallenge(String image, String secretWord, double latitude, double longitude, String id) {
+        super(latitude, longitude, id);
         this.image = image;
         this.secretWord = secretWord;
     }
