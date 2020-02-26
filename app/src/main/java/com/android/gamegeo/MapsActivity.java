@@ -8,12 +8,16 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Looper;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.android.gamegeo.ChallengeModels.PictionaryChallenge;
+import com.android.gamegeo.ChallengeModels.Challenge;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -117,6 +121,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        /* Button Handler for starting a challenge */
+        Button startChallengeButton = (Button)findViewById(R.id.start_challenge_button);
+        startChallengeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // do whatever you want on click
+                FragmentManager fm = getSupportFragmentManager();
+                StartChallengeSelectDialog dialog = new StartChallengeSelectDialog();
+                dialog.show(fm, "Challenge Select");
+            }
+        });
 
     }
 
@@ -383,7 +399,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 //            m.setTag(c.getId());
 //        }
         for(Map.Entry c : challenges.entrySet()){
-            Challenge challenge = (Challenge) c.getValue();
+            Challenge challenge = (PictionaryChallenge) c.getValue();
             LatLng cLatLong = new LatLng(challenge.getLatitude(), challenge.getLongitude());
             Marker m = mMap.addMarker(new MarkerOptions().position(cLatLong)
                     .title("Marker for a Pictionary Challenge"));

@@ -14,9 +14,9 @@
     />
 
     <Button
-        android:id="@+id/start_challenge"
+        android:id="@+id/start_challenge_button"
         android:layout_width="157dp"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:text="Begin a Challenge"/>
+        android:text="Begin a Challenge" />
 </FrameLayout>

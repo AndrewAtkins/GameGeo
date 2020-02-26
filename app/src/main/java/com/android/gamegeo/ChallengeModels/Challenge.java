@@ -1,4 +1,4 @@
-package com.android.gamegeo;
+package com.android.gamegeo.ChallengeModels;
 
 public class Challenge {
     private double latitude;
