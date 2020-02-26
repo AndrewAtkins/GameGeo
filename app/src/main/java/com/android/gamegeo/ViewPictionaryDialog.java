@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -12,6 +13,7 @@ import androidx.fragment.app.DialogFragment;
 import android.app.AlertDialog;
 
 import android.util.Base64;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -71,13 +73,19 @@ public class ViewPictionaryDialog extends DialogFragment {
 
                 String value = guessText.getText().toString();
                 if(value.toLowerCase().equals(secretWord.toLowerCase())){
-                    Toast.makeText(getActivity(),
+                    Toast toast = Toast.makeText(getActivity(),
                             "You guessed correctly!",
-                            Toast.LENGTH_SHORT).show();
+                            Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP,0,0);
+                    toast.getView().setBackgroundColor(Color.GREEN);
+                    toast.show();
                 } else {
-                    Toast.makeText(getActivity(),
+                    Toast toast = Toast.makeText(getActivity(),
                             "You guessed incorrectly.",
-                            Toast.LENGTH_SHORT).show();
+                            Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP,0,0);
+                    toast.getView().setBackgroundColor(Color.rgb(255, 102, 102));
+                    toast.show();
                 }
             }
         });
