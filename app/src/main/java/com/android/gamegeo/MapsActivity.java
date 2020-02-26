@@ -391,7 +391,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             Bitmap b = BitmapFactory.decodeResource(getResources(), R.drawable.ic_pictionary_marker);
             Bitmap smallMarker = Bitmap.createScaledBitmap(b, width, height, false);
             BitmapDescriptor icon = BitmapDescriptorFactory.fromBitmap(smallMarker);
-//            BitmapDescriptor icon = BitmapDescriptorFactory.fromResource(R.drawable.ic_pictionary_marker);
             m.setIcon(icon);
         }
     }
