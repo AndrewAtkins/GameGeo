@@ -17,10 +17,10 @@ import android.view.ViewGroup;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ChallengeDialog extends DialogFragment {
+public class ViewPictionaryDialog extends DialogFragment {
 
 
-    public ChallengeDialog() {
+    public ViewPictionaryDialog() {
         // Required empty public constructor
     }
     @Override
