@@ -16,7 +16,6 @@ import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
@@ -65,6 +64,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private static final int REQUEST_CHECK_SETTINGS = 2;
 
+    /*
+        Challenge variables. This array will be populated with challenges pulled from the DB.
+     */
+    private HashMap<String, Challenge> challenges = new HashMap<>() ;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,21 +94,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapFragment.getMapAsync(this);
 
 
-        // !!!***WORK HERE. MIGHT NEED TO MOVE METHOD ELSEWHERE
-        mLocationCallback = new LocationCallback(){
-            @Override
-            public void onLocationResult(LocationResult locationResult)
-            {
-                if (locationResult == null)
-                {
-                    return;
-                }
-                for (Location location : locationResult.getLocations())
-                {
-                    // update
-                }
-            }
-        };
     }
 
     @Override
