@@ -4,6 +4,7 @@ package com.android.gamegeo;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 
@@ -51,7 +52,8 @@ public class StartChallengeSelectDialog extends DialogFragment {
         pictionaryButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                Intent i = new Intent(getActivity(), PictionaryActivity.class);
+                startActivity(i);
             }
         });
 
