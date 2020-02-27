@@ -10,14 +10,17 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentManager;
 
-import com.android.gamegeo.ChallengeModels.PictionaryChallenge;
 import com.android.gamegeo.ChallengeModels.Challenge;
+import com.android.gamegeo.ChallengeModels.PictionaryChallenge;
+import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -26,9 +29,11 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
@@ -38,15 +43,12 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.net.PlacesClient;
-
-import androidx.fragment.app.FragmentManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -62,9 +64,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private FusedLocationProviderClient mFusedLocationProviderClient;
     // contains quality of service params for requests to FusedLocationProvider
     private LocationRequest mLocationRequest;
-    private static final long INTERVAL = 1000 * 5; //10 minutes between map updates
-    private static final long FASTEST_INTERVAL = 1000 * 5; //20 seconds between map updates
-
+    private static final long INTERVAL = 1000 * 30; //30 seconds between map updates
+    private static final long FASTEST_INTERVAL = 1000 * 5; //5 seconds between map updates
     /* used for receiving notifications from FusedLocationProvider when location changes / no longer
      can be determined.*/
     private LocationCallback mLocationCallback;
@@ -79,7 +80,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final int DEFAULT_ZOOM = 18;
     private boolean mLocationPermissionGranted;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
-    private static final int REQUEST_CHECK_SETTINGS = 2;
+    //Constant used in the location settings dialog.
+    private static final int REQUEST_CHECK_SETTINGS = 0x1;
+    //provides access to Location Settings API
+    private SettingsClient mSettingsClient;
+    /* Stores the types of location services the client is interested in using. Used for checking
+     settings to determine if the device has optimal location settings.*/
+    private LocationSettingsRequest mLocationSettingsRequest;
+    private boolean mRequestingLocationUpdates;
 
     /*
         Challenge variables. This array will be populated with challenges pulled from the DB.
@@ -101,10 +109,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         // Construct a PlacesClient
         Places.initialize(getApplicationContext(), getString(R.string.google_maps_key));
         mPlacesClient = Places.createClient(this);
-
         // Construct a FusedLocationProviderClient.
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-
+        //construct SettingsClient
+        mSettingsClient = LocationServices.getSettingsClient(this);
+        mRequestingLocationUpdates = false;
         /*
             Here we will need to call the database and populate the challenges array
          */
@@ -135,34 +144,38 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
-        mLocationCallback = new LocationCallback(){
-            @Override
-            public void onLocationResult(LocationResult locationResult){
-                super.onLocationResult(locationResult);
-                Log.i(TAG,"In callback - permission: " + mLocationPermissionGranted);
-                mLastKnownLocation = locationResult.getLastLocation();
-                updateLocationUI();
-            }
-        };
 
+        createLocationCallback();
         createLocationRequest();
-        getCurrentLocationSettings();
+        buildLocationSettingsRequest();
 
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        Log.i(TAG,"onResume() permission: " + mLocationPermissionGranted);
+        Log.i(TAG, "onResume() permission then reqUpdates: " + mLocationPermissionGranted
+         + " " + mRequestingLocationUpdates);
 
         if (mLocationPermissionGranted) {
+            mRequestingLocationUpdates = true;
             try {
-                Log.i(TAG,"onResume() if permission: " + mLocationPermissionGranted);
-                startLocationUpdates();
+                Log.i(TAG, "onResume() permission then reqUpdates: " + mLocationPermissionGranted
+                        + " " + mRequestingLocationUpdates);                startLocationUpdates();
             } catch (SecurityException e) {
                 Log.e("Exception: %s", e.getMessage());
             }
         }
+        else if(!mLocationPermissionGranted)
+        {
+            getLocationPermission();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        stopLocationUpdates();
     }
 
 
@@ -255,7 +268,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
          */
         try {
             if (mLocationPermissionGranted) {
-                Log.i(TAG,"permission: " + mLocationPermissionGranted);
+                Log.i(TAG, "permission: " + mLocationPermissionGranted);
                 Task<Location> locationResult = mFusedLocationProviderClient.getLastLocation();
                 locationResult.addOnCompleteListener(this, new OnCompleteListener<Location>() {
                     @Override
@@ -296,6 +309,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             mLocationPermissionGranted = true;
+            mRequestingLocationUpdates = true;
+
+            if(mRequestingLocationUpdates)
+            {
+                Log.i(TAG, "Permission granted, updates requested, starting location updates");
+                startLocationUpdates();
+            }
+
         } else {
             ActivityCompat.requestPermissions(this,
                     new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
@@ -317,6 +338,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     mLocationPermissionGranted = true;
+                    mRequestingLocationUpdates = true;
                 }
             }
         }
@@ -332,10 +354,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         try {
             if (mLocationPermissionGranted) {
-                Log.i(TAG,"permission: " + mLocationPermissionGranted);
+                Log.i(TAG, "permission: " + mLocationPermissionGranted);
                 mMap.setMyLocationEnabled(true);
                 mMap.getUiSettings().setMyLocationButtonEnabled(true);
-                if(mLastKnownLocation != null) {
+                if (mLastKnownLocation != null) {
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                             new LatLng(mLastKnownLocation.getLatitude(),
                                     mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));
@@ -374,45 +396,96 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     /**
-     * Gets current location settings of a user's device.
+     * Creates the locationCallback
      */
-    private void getCurrentLocationSettings() {
-        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
-                .addLocationRequest(mLocationRequest);
-/*
-        SettingsClient client = LocationServices.getSettingsClient(this);
-        Task<LocationSettingsResponse> task = client.checkLocationSettings(builder.build());
-
-        task.addOnSuccessListener(this, new OnSuccessListener<LocationSettingsResponse>() {
+    private void createLocationCallback() {
+        mLocationCallback = new LocationCallback() {
             @Override
-            public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
-                // All location settings are satisfied. The client can initialize
-                // location requests here.
+            public void onLocationResult(LocationResult locationResult) {
+                super.onLocationResult(locationResult);
+                Log.i(TAG, "In callback - permission: " + mLocationPermissionGranted);
+                mLastKnownLocation = locationResult.getLastLocation();
+                updateLocationUI();
             }
-        });
+        };
+    }
 
-        task.addOnFailureListener(this, new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                //Location settings are not satisfied, but this can be fixed by showing the user a dialog.
-                try {
-                    // Show the dialog by calling startResolutionForResult(),
-                    // and check the result in onActivityResult().
-                    ResolvableApiException resolvable = (ResolvableApiException) e;
-                    resolvable.startResolutionForResult(MapsActivity.this,
-                            REQUEST_CHECK_SETTINGS);
-                } catch (IntentSender.SendIntentException sendEx) {
-                    //ignore the error
-                }
-            }
-        });*/
+    /**
+     * Uses a {@link com.google.android.gms.location.LocationSettingsRequest.Builder} to build
+     * a {@link com.google.android.gms.location.LocationSettingsRequest} that is used for checking
+     * if a device has the needed location settings.
+     */
+    private void buildLocationSettingsRequest() {
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
+        builder.addLocationRequest(mLocationRequest);
+        mLocationSettingsRequest = builder.build();
     }
 
     private void startLocationUpdates() throws SecurityException {
-        Log.i(TAG," startLocationUpdate() permission: " + mLocationPermissionGranted);
-        mFusedLocationProviderClient.requestLocationUpdates(mLocationRequest,
-                mLocationCallback, Looper.getMainLooper());
+        Log.i(TAG, " startLocationUpdate() permission: " + mLocationPermissionGranted);
+
+        // Begin by checking if the device has the necessary location settings.
+        Log.i(TAG, "LocationSettingRequest: " + mLocationSettingsRequest);
+        mSettingsClient.checkLocationSettings(mLocationSettingsRequest)
+                .addOnSuccessListener(this, new OnSuccessListener<LocationSettingsResponse>() {
+                    @Override
+                    public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
+                        Log.i(TAG, "All location settings are satisfied.");
+
+                        //noinspection MissingPermission
+                        mFusedLocationProviderClient.requestLocationUpdates(mLocationRequest,
+                                mLocationCallback, Looper.myLooper());
+
+                        updateLocationUI();
+                    }
+                })
+                .addOnFailureListener(this, new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        int statusCode = ((ApiException) e).getStatusCode();
+                        switch (statusCode) {
+                            case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                                Log.i(TAG, "Location settings are not satisfied. Attempting to upgrade " +
+                                        "location settings ");
+                                try {
+                                    // Show the dialog by calling startResolutionForResult(), and check the
+                                    // result in onActivityResult().
+                                    ResolvableApiException rae = (ResolvableApiException) e;
+                                    rae.startResolutionForResult(MapsActivity.this, REQUEST_CHECK_SETTINGS);
+                                } catch (IntentSender.SendIntentException sie) {
+                                    Log.i(TAG, "PendingIntent unable to execute request.");
+                                }
+                                break;
+                            case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                                String errorMessage = "Location settings are inadequate, and cannot be " +
+                                        "fixed here. Fix in Settings.";
+                                Log.e(TAG, errorMessage);
+                                Toast.makeText(MapsActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+                                mRequestingLocationUpdates = false;
+                        }
+                        updateLocationUI();
+                    }
+                });
     }
+
+    /**
+     * Removes location updates from the FusedLocationApi.
+     */
+    private void stopLocationUpdates() {
+        if (!mRequestingLocationUpdates) {
+            Log.d(TAG, "stopLocationUpdates: updates never requested, no-op.");
+            return;
+        }
+
+        mFusedLocationProviderClient.removeLocationUpdates(mLocationCallback)
+                .addOnCompleteListener(this, new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        mRequestingLocationUpdates = false;
+                    }
+                });
+    }
+
 
     private void createMarkers() {
 //        for(Challenge c: challenges) {
