@@ -21,6 +21,7 @@ import java.util.ArrayList;
 public class PaintView extends View {
 
     public static int BRUSH_SIZE = 20;
+    public static int ERASER_SIZE = 70;
     public static final int DEFAULT_COLOR = Color.BLACK;
     public static final int DEFAULT_BG_COLOR = Color.WHITE;
     private static final float TOUCH_TOLERANCE = 4;
@@ -165,5 +166,28 @@ public class PaintView extends View {
         }
 
         return true;
+    }
+    public void setCurrentColor(String c){
+        this.strokeWidth = BRUSH_SIZE;
+        switch(c.toUpperCase()){
+            case "RED":
+                this.currentColor = Color.RED;
+                break;
+            case "BLUE":
+                this.currentColor = Color.BLUE;
+                break;
+            case "GREEN":
+                this.currentColor = Color.GREEN;
+                break;
+            case "BLACK":
+                this.currentColor = Color.BLACK;
+                break;
+            default:
+                break;
+        }
+    }
+    public void setEraser() {
+        this.currentColor = backgroundColor;
+        this.strokeWidth = ERASER_SIZE;
     }
 }
