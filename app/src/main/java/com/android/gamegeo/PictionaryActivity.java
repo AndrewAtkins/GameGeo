@@ -2,10 +2,13 @@ package com.android.gamegeo;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.ActionBar;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -13,6 +16,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -39,16 +43,10 @@ public class PictionaryActivity extends AppCompatActivity implements OnItemSelec
         /*
             Create the back button
          */
-        Button backToMap = (Button)findViewById(R.id.back_to_map_button);
-        backToMap.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(c, MapsActivity.class);
-                startActivity(i);
-            }
-        });
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         /*
-            Create the back button
+            Create the eraser button handler
          */
         ImageButton eraserButton = (ImageButton)findViewById(R.id.eraser_button);
         eraserButton.setOnClickListener(new View.OnClickListener() {
@@ -61,7 +59,7 @@ public class PictionaryActivity extends AppCompatActivity implements OnItemSelec
         /*
             Set color picker for pictionary
          */
-        Spinner spinner = (Spinner) findViewById(R.id.color_spinner);
+        final Spinner spinner = (Spinner) findViewById(R.id.color_spinner);
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.color_array, android.R.layout.simple_spinner_item);
@@ -71,6 +69,44 @@ public class PictionaryActivity extends AppCompatActivity implements OnItemSelec
         spinner.setAdapter(adapter);
 
         spinner.setOnItemSelectedListener(this);
+
+        /*
+            Create the brush button handler
+         */
+        ImageButton brushButton = (ImageButton)findViewById(R.id.drawing_button);
+        brushButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                paintView.setCurrentColor("BLACK");
+                spinner.setSelection(3);
+            }
+        });
+
+        /*
+            Create the submit button handler
+         */
+        Button submitButton = (Button) findViewById(R.id.submit_pictionary_button);
+        submitButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EditText textSubmit = (EditText) findViewById(R.id.drawing_title_text);
+                String secretWord = textSubmit.getText().toString();
+                if(secretWord.length() > 0) {
+
+                } else {
+                    Toast.makeText(PictionaryActivity.this, "You must enter a secret word!", 3);
+                }
+            }
+        });
+    }
+    /*
+        Method for the back button
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        Intent myIntent = new Intent(getApplicationContext(), MapsActivity.class);
+        startActivityForResult(myIntent, 0);
+        return true;
     }
 
     @Override

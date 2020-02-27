@@ -1,5 +1,6 @@
 package com.android.gamegeo;
 
+import android.util.Base64;
 import android.view.View;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -16,6 +17,7 @@ import android.view.MotionEvent;
 
 import com.android.gamegeo.PictionaryModels.FingerPath;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 
 public class PaintView extends View {
@@ -189,5 +191,16 @@ public class PaintView extends View {
     public void setEraser() {
         this.currentColor = backgroundColor;
         this.strokeWidth = ERASER_SIZE;
+    }
+    public String convertImageToBase64() {
+        View view = this;
+        Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        view.draw(canvas);
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+        byte[] byteArray = byteArrayOutputStream .toByteArray();
+        return Base64.encodeToString(byteArray, Base64.DEFAULT);
     }
 }
