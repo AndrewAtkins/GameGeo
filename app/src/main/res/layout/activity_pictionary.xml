@@ -20,6 +20,11 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:orientation="vertical">
+
+            <com.android.gamegeo.PaintView
+                android:id="@+id/paintView"
+                android:layout_width="304dp"
+                android:layout_height="333dp" />
         </LinearLayout>
     </FrameLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
