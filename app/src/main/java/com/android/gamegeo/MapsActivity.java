@@ -40,6 +40,7 @@ import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -72,6 +73,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     // The geographical location where the device is currently located. That is, the last-known
     // location retrieved by the Fused Location Provider.
     private Location mLastKnownLocation;
+    // boundary for the camera
+    private LatLngBounds BOUNDS;
     private static final String KEY_LOCATION = "location";
     private static final String KEY_CAMERA_POSITION = "camera_position";
     private static final String KEY_REQUESTING_LOCATION_UPDATES = "requesting_updates";
@@ -210,14 +213,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         // Prompt the user for permission.
         getLocationPermission();
 
+        // Set properties of the map such as disabling panning
+        setMapProperties();
+
         // Turn on the My Location layer and the related control on the map.
         updateLocationUI();
 
         // Get the current location of the device and set the position of the map.
         getDeviceLocation();
 
-        // Set properties of the map such as disabling panning
-        setMapProperties();
+
 
         // Create markers from what is in the challenges array list
         createMarkers();
@@ -354,15 +359,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         try {
             if (mLocationPermissionGranted) {
                 mMap.setMyLocationEnabled(true);
-                mMap.getUiSettings().setMyLocationButtonEnabled(true);
                 if (mLastKnownLocation != null) {
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                            new LatLng(mLastKnownLocation.getLatitude(),
-                                    mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));
+                    setBounds();
+                    mMap.setLatLngBoundsForCameraTarget(BOUNDS);
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(
+                            mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude())));
                 }
             } else {
                 mMap.setMyLocationEnabled(false);
-                mMap.getUiSettings().setMyLocationButtonEnabled(false);
                 mLastKnownLocation = null;
                 getLocationPermission();
             }
@@ -372,12 +376,24 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     /**
+     * Creates a LatLng Bounds for camera target.
+     */
+    private void setBounds() {
+        LatLngBounds.Builder latLngBoundBuilder = new LatLngBounds.Builder();
+
+        latLngBoundBuilder.include(new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()));
+        BOUNDS = latLngBoundBuilder.build();
+
+
+    }
+    /**
      * Sets properties of the map that we will always want such as not being able to pan and not being able to zoom out very far
      */
     private void setMapProperties() {
-//        mMap.getUiSettings().setScrollGesturesEnabled(false);
+//      mMap.getUiSettings().setScrollGesturesEnabled(false);
         mMap.setMaxZoomPreference(20);
         mMap.setMinZoomPreference(15);
+        mMap.getUiSettings().setMyLocationButtonEnabled(false);
         //mMap.getUiSettings().setScrollGesturesEnabled(false);
         //mMap.getUiSettings().setZoomGesturesEnabled(false);
     }
