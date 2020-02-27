@@ -74,6 +74,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Location mLastKnownLocation;
     private static final String KEY_LOCATION = "location";
     private static final String KEY_CAMERA_POSITION = "camera_position";
+    private static final String KEY_REQUESTING_LOCATION_UPDATES = "requesting_updates";
     // A default location (Sydney, Australia) and default zoom to use when location permission is
     // not granted.
     private final LatLng mDefaultLocation = new LatLng(-33.8523341, 151.2106085);
@@ -102,6 +103,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (savedInstanceState != null) {
             mCameraPosition = savedInstanceState.getParcelable(KEY_CAMERA_POSITION);
             mLastKnownLocation = savedInstanceState.getParcelable(KEY_LOCATION);
+            mRequestingLocationUpdates = savedInstanceState.getParcelable(KEY_REQUESTING_LOCATION_UPDATES);
         }
         setContentView(R.layout.activity_maps);
 
@@ -154,14 +156,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     protected void onResume() {
         super.onResume();
-        Log.i(TAG, "onResume() permission then reqUpdates: " + mLocationPermissionGranted
-         + " " + mRequestingLocationUpdates);
-
         if (mLocationPermissionGranted) {
             mRequestingLocationUpdates = true;
             try {
-                Log.i(TAG, "onResume() permission then reqUpdates: " + mLocationPermissionGranted
-                        + " " + mRequestingLocationUpdates);                startLocationUpdates();
+                startLocationUpdates();
             } catch (SecurityException e) {
                 Log.e("Exception: %s", e.getMessage());
             }
@@ -183,11 +181,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
      * Saves the state of the map when the activity is paused.
      */
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    protected void onSaveInstanceState(Bundle savedInstanceState) {
         if (mMap != null) {
-            outState.putParcelable(KEY_CAMERA_POSITION, mMap.getCameraPosition());
-            outState.putParcelable(KEY_LOCATION, mLastKnownLocation);
-            super.onSaveInstanceState(outState);
+            savedInstanceState.putParcelable(KEY_CAMERA_POSITION, mMap.getCameraPosition());
+            savedInstanceState.putParcelable(KEY_LOCATION, mLastKnownLocation);
+            savedInstanceState.putBoolean(KEY_REQUESTING_LOCATION_UPDATES, mRequestingLocationUpdates);
+
+            super.onSaveInstanceState(savedInstanceState);
         }
     }
 
@@ -268,7 +268,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
          */
         try {
             if (mLocationPermissionGranted) {
-                Log.i(TAG, "permission: " + mLocationPermissionGranted);
                 Task<Location> locationResult = mFusedLocationProviderClient.getLastLocation();
                 locationResult.addOnCompleteListener(this, new OnCompleteListener<Location>() {
                     @Override
@@ -354,7 +353,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         try {
             if (mLocationPermissionGranted) {
-                Log.i(TAG, "permission: " + mLocationPermissionGranted);
                 mMap.setMyLocationEnabled(true);
                 mMap.getUiSettings().setMyLocationButtonEnabled(true);
                 if (mLastKnownLocation != null) {
@@ -380,8 +378,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 //        mMap.getUiSettings().setScrollGesturesEnabled(false);
         mMap.setMaxZoomPreference(20);
         mMap.setMinZoomPreference(15);
-        // mMap.getUiSettings().setScrollGesturesEnabled(false);
-        // mMap.getUiSettings().setZoomGesturesEnabled(false);
+        //mMap.getUiSettings().setScrollGesturesEnabled(false);
+        //mMap.getUiSettings().setZoomGesturesEnabled(false);
     }
 
     /**
@@ -403,7 +401,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onLocationResult(LocationResult locationResult) {
                 super.onLocationResult(locationResult);
-                Log.i(TAG, "In callback - permission: " + mLocationPermissionGranted);
                 mLastKnownLocation = locationResult.getLastLocation();
                 updateLocationUI();
             }
@@ -422,10 +419,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void startLocationUpdates() throws SecurityException {
-        Log.i(TAG, " startLocationUpdate() permission: " + mLocationPermissionGranted);
-
         // Begin by checking if the device has the necessary location settings.
-        Log.i(TAG, "LocationSettingRequest: " + mLocationSettingsRequest);
         mSettingsClient.checkLocationSettings(mLocationSettingsRequest)
                 .addOnSuccessListener(this, new OnSuccessListener<LocationSettingsResponse>() {
                     @Override
