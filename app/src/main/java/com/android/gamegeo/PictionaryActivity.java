@@ -92,9 +92,19 @@ public class PictionaryActivity extends AppCompatActivity implements OnItemSelec
                 EditText textSubmit = (EditText) findViewById(R.id.drawing_title_text);
                 String secretWord = textSubmit.getText().toString();
                 if(secretWord.length() > 0) {
+                    String imageEncoded = paintView.convertImageToBase64();
+                    /* PLACEHOLDER: Once we have the database set up, we will want to push this data to the database rather than sending it as an extra*/
+                    Intent myIntent = new Intent(getApplicationContext(), MapsActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putString("new_image", imageEncoded);
+                    bundle.putString("new_secret_word", secretWord);
+                    bundle.putDouble("new_lat", getIntent().getExtras().getDouble("user_lat"));
+                    bundle.putDouble("new_long", getIntent().getExtras().getDouble("user_long"));
+                    myIntent.putExtras(bundle);
+                    startActivityForResult(myIntent, 0);
 
                 } else {
-                    Toast.makeText(PictionaryActivity.this, "You must enter a secret word!", 3);
+                    Toast.makeText(PictionaryActivity.this, "You must enter a secret word!", Toast.LENGTH_SHORT);
                 }
             }
         });
