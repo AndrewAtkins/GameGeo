@@ -1,5 +1,6 @@
 package com.android.gamegeo;
 
+import android.os.AsyncTask;
 import android.util.Base64;
 import android.view.View;
 import android.content.Context;
@@ -14,10 +15,12 @@ import android.graphics.Path;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
+import android.widget.ImageView;
 
 import com.android.gamegeo.PictionaryModels.FingerPath;
 
 import java.io.ByteArrayOutputStream;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 public class PaintView extends View {
@@ -200,7 +203,7 @@ public class PaintView extends View {
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
-        byte[] byteArray = byteArrayOutputStream .toByteArray();
+        byte[] byteArray = byteArrayOutputStream.toByteArray();
         return Base64.encodeToString(byteArray, Base64.DEFAULT);
     }
 }

@@ -90,6 +90,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LocationSettingsRequest mLocationSettingsRequest;
     private boolean mRequestingLocationUpdates;
 
+    /* PLACEHOLDER: variables for creating new challenge on map*/
+    private String newImage = "";
+    private String newSecretWord = "";
+    private double newChallengeLat = 0;
+    private double newChallengeLong = 0;
+    private double lastKnownLat = 0;
+    private double lastKnownLong = 0;
     /*
         Challenge variables. This array will be populated with challenges pulled from the DB.
      */
@@ -105,6 +112,22 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mLastKnownLocation = savedInstanceState.getParcelable(KEY_LOCATION);
             mRequestingLocationUpdates = savedInstanceState.getParcelable(KEY_REQUESTING_LOCATION_UPDATES);
         }
+
+        if(getIntent() != null && getIntent().getExtras() != null) {
+            if(getIntent().getExtras().getString("new_image") != null) {
+                newImage = getIntent().getExtras().getString("new_image");
+            }
+            if(getIntent().getExtras().getString("new_secret_word") != null) {
+                newSecretWord = getIntent().getExtras().getString("new_secret_word");
+            }
+            if(getIntent().getExtras().getDouble("new_lat") != 0) {
+                newChallengeLat = getIntent().getExtras().getDouble("new_lat");
+            }
+            if(getIntent().getExtras().getDouble("new_long") != 0) {
+                newChallengeLong = getIntent().getExtras().getDouble("new_long");
+            }
+        }
+
         setContentView(R.layout.activity_maps);
 
 
@@ -129,6 +152,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         challenges.put(testchallenge2.getId(), testchallenge2);
         challenges.put(testchallenge3.getId(), testchallenge3);
 
+        if(!newImage.equals("") && !newSecretWord.equals("") && newChallengeLat != 0 && newChallengeLong != 0) {
+            PictionaryChallenge newChallenge = new PictionaryChallenge(newImage,
+                    newSecretWord, newChallengeLat, newChallengeLong, "77");
+            challenges.put(newChallenge.getId(), newChallenge);
+        }
+
         // Build the Map
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -139,9 +168,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         startChallengeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // do whatever you want on click
+                Bundle args = new Bundle();
+                args.putDouble("user_lat", lastKnownLat);
+                args.putDouble("user_long", lastKnownLong);
+
                 FragmentManager fm = getSupportFragmentManager();
                 StartChallengeSelectDialog dialog = new StartChallengeSelectDialog();
+                dialog.setArguments(args);
+
                 dialog.show(fm, "Challenge Select");
             }
         });
@@ -359,6 +393,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                             new LatLng(mLastKnownLocation.getLatitude(),
                                     mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));
+                    lastKnownLat = mLastKnownLocation.getLatitude();
+                    lastKnownLong = mLastKnownLocation.getLongitude();
                 }
             } else {
                 mMap.setMyLocationEnabled(false);

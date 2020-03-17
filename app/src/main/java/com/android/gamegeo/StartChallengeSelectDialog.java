@@ -53,6 +53,10 @@ public class StartChallengeSelectDialog extends DialogFragment {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(getActivity(), PictionaryActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putDouble("user_lat", getArguments().getDouble("user_lat"));
+                bundle.putDouble("user_long", getArguments().getDouble("user_long"));
+                i.putExtras(bundle);
                 startActivity(i);
             }
         });
