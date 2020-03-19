@@ -161,6 +161,9 @@ public class PictionaryActivity extends AppCompatActivity implements OnItemSelec
             case "GREEN":
                 paintView.setCurrentColor("GREEN");
                 break;
+            case "YELLOW":
+                paintView.setCurrentColor("YELLOW");
+                break;
             case "BLACK":
                 paintView.setCurrentColor("BLACK");
                 break;
