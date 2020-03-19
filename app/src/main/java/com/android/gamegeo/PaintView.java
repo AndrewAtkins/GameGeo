@@ -184,6 +184,9 @@ public class PaintView extends View {
             case "GREEN":
                 this.currentColor = Color.GREEN;
                 break;
+            case "YELLOW":
+                this.currentColor = Color.YELLOW;
+                break;
             case "BLACK":
                 this.currentColor = Color.BLACK;
                 break;
