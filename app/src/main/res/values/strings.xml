@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Game Geo</string>
     <string name="title_activity_maps">Map</string>
-
+    <string name="my_app_id">game-geo-ygder</string> <!-- mongo stitch id -->   
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string-array name="color_array">
