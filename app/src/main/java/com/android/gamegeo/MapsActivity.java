@@ -49,6 +49,12 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.net.PlacesClient;
+import com.mongodb.client.MongoClient;
+import com.mongodb.stitch.android.core.Stitch;
+import com.mongodb.stitch.android.core.StitchAppClient;
+import com.mongodb.stitch.android.core.auth.StitchUser;
+import com.mongodb.stitch.android.services.mongodb.remote.RemoteMongoClient;
+import com.mongodb.stitch.core.auth.providers.anonymous.AnonymousCredential;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -184,6 +190,25 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         createLocationCallback();
         createLocationRequest();
         buildLocationSettingsRequest();
+
+        Stitch.initializeDefaultAppClient(getResources().getString(R.string.my_app_id));
+        StitchAppClient stitchAppClient = Stitch.getDefaultAppClient();
+        stitchAppClient.getAuth().loginWithCredential(new AnonymousCredential())
+                .addOnCompleteListener(new OnCompleteListener<StitchUser>() {
+                    @Override
+                    public void onComplete(@NonNull Task<StitchUser> task) {
+                        if(task.isSuccessful())
+                        {
+                            Log.d("stitch", "logged in anonymously");
+                        } else {
+                            Log.e("stitch", "failed to log in anonymously", task.getException());
+                        }
+                    }
+                });
+
+        //MongoClient mongoClient = stitchAppClient.getServiceClient(RemoteMongoClient.factory,"Game-Geo");
+
+
 
     }
 
