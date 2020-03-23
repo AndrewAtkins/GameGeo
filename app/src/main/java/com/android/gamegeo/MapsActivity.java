@@ -43,6 +43,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -54,9 +55,19 @@ import com.mongodb.stitch.android.core.Stitch;
 import com.mongodb.stitch.android.core.StitchAppClient;
 import com.mongodb.stitch.android.core.auth.StitchUser;
 import com.mongodb.stitch.android.services.mongodb.remote.RemoteMongoClient;
+import com.mongodb.stitch.android.services.mongodb.remote.RemoteMongoCollection;
 import com.mongodb.stitch.core.auth.providers.anonymous.AnonymousCredential;
+import com.mongodb.stitch.core.services.mongodb.remote.RemoteInsertOneResult;
+import com.mongodb.stitch.core.services.mongodb.remote.RemoteUpdateOptions;
+import com.mongodb.stitch.core.services.mongodb.remote.RemoteUpdateResult;
 
+import org.bson.Document;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -103,6 +114,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private double newChallengeLong = 0;
     private double lastKnownLat = 0;
     private double lastKnownLong = 0;
+
+    /* DATABASE variables */
+    private RemoteMongoCollection<Document> pictionaryCollection;
     /*
         Challenge variables. This array will be populated with challenges pulled from the DB.
      */
@@ -191,24 +205,55 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         createLocationRequest();
         buildLocationSettingsRequest();
 
-        Stitch.initializeDefaultAppClient(getResources().getString(R.string.my_app_id));
-        StitchAppClient stitchAppClient = Stitch.getDefaultAppClient();
-        stitchAppClient.getAuth().loginWithCredential(new AnonymousCredential())
-                .addOnCompleteListener(new OnCompleteListener<StitchUser>() {
-                    @Override
-                    public void onComplete(@NonNull Task<StitchUser> task) {
-                        if(task.isSuccessful())
-                        {
-                            Log.d("stitch", "logged in anonymously");
-                        } else {
-                            Log.e("stitch", "failed to log in anonymously", task.getException());
-                        }
-                    }
-                });
+//        Stitch.initializeDefaultAppClient(getResources().getString(R.string.my_app_id));
+//        final StitchAppClient stitchAppClient = Stitch.getDefaultAppClient();
+////        final StitchAppClient stitchAppClient =
+////                Stitch.initializeDefaultAppClient(getResources().getString(R.string.my_app_id));
+//        stitchAppClient.getAuth().loginWithCredential(new AnonymousCredential())
+//        .addOnCompleteListener(new OnCompleteListener<StitchUser>() {
+//            @Override
+//            public void onComplete(@NonNull Task<StitchUser> task) {
+//                if(task.isSuccessful())
+//                {
+//                    Log.d("stitch", "logged in anonymously");
+//                } else {
+//                    Log.e("stitch", "failed to log in anonymously", task.getException());
+//                }
+//            }
+//        });
+//
+//        final RemoteMongoClient mongoClient =
+//                stitchAppClient.getServiceClient(RemoteMongoClient.factory, "mongodb-atlas");
 
-        //MongoClient mongoClient = stitchAppClient.getServiceClient(RemoteMongoClient.factory,"Game-Geo");
+//        coll = mongoClient.getDatabase("GameGeo").getCollection("pictionary_pins");
+        pictionaryCollection = ((App)this.getApplication()).getMongoClient().getDatabase("GameGeo").getCollection("pictionary_pins");
 
+        /* If a challenge was created, send it to the database*/
+        if(!newImage.equals("") && !newSecretWord.equals("") && newChallengeLat != 0 && newChallengeLong != 0) {
+//            PictionaryChallenge newChallenge = new PictionaryChallenge(newImage,
+//                    newSecretWord, newChallengeLat, newChallengeLong, "77");
+//            challenges.put(newChallenge.getId(), newChallenge);
+            insertPictionaryChallengToDatabase(newChallengeLat, newChallengeLong, newSecretWord, newImage);
+        }
 
+//        Document newItem = new Document()
+//                .append("lat", 1280)
+//                .append("long", 888)
+//                .append("secret_word", "HI");
+//
+//
+//        final Task <RemoteInsertOneResult> insertTask = pictionaryCollection.insertOne(newItem);
+//        insertTask.addOnCompleteListener(new OnCompleteListener <RemoteInsertOneResult> () {
+//            @Override
+//            public void onComplete(@NonNull Task <RemoteInsertOneResult> task) {
+//                if (task.isSuccessful()) {
+//                    Log.d("app", String.format("successfully inserted item with id %s",
+//                            task.getResult().getInsertedId()));
+//                } else {
+//                    Log.e("app", "failed to insert document with: ", task.getException());
+//                }
+//            }
+//        });
 
     }
 
@@ -563,5 +608,27 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             BitmapDescriptor icon = BitmapDescriptorFactory.fromBitmap(smallMarker);
             m.setIcon(icon);
         }
+    }
+
+    private void insertPictionaryChallengToDatabase(double lat, double lon, String secret_word, String picture) {
+        Document newItem = new Document()
+                .append("lat", lat)
+                .append("long", lon)
+                .append("secret_word", secret_word)
+                .append("picture", picture);
+
+
+        final Task <RemoteInsertOneResult> insertTask = pictionaryCollection.insertOne(newItem);
+        insertTask.addOnCompleteListener(new OnCompleteListener <RemoteInsertOneResult> () {
+            @Override
+            public void onComplete(@NonNull Task <RemoteInsertOneResult> task) {
+                if (task.isSuccessful()) {
+                    Log.d("app", String.format("successfully inserted item with id %s",
+                            task.getResult().getInsertedId()));
+                } else {
+                    Log.e("app", "failed to insert document with: ", task.getException());
+                }
+            }
+        });
     }
 }
