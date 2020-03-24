@@ -115,8 +115,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private double lastKnownLat = 0;
     private double lastKnownLong = 0;
 
-    /* DATABASE variables */
-    private RemoteMongoCollection<Document> pictionaryCollection;
+//    /* DATABASE variables */
+//    private RemoteMongoCollection<Document> pictionaryCollection;
     /*
         Challenge variables. This array will be populated with challenges pulled from the DB.
      */
@@ -205,55 +205,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         createLocationRequest();
         buildLocationSettingsRequest();
 
-//        Stitch.initializeDefaultAppClient(getResources().getString(R.string.my_app_id));
-//        final StitchAppClient stitchAppClient = Stitch.getDefaultAppClient();
-////        final StitchAppClient stitchAppClient =
-////                Stitch.initializeDefaultAppClient(getResources().getString(R.string.my_app_id));
-//        stitchAppClient.getAuth().loginWithCredential(new AnonymousCredential())
-//        .addOnCompleteListener(new OnCompleteListener<StitchUser>() {
-//            @Override
-//            public void onComplete(@NonNull Task<StitchUser> task) {
-//                if(task.isSuccessful())
-//                {
-//                    Log.d("stitch", "logged in anonymously");
-//                } else {
-//                    Log.e("stitch", "failed to log in anonymously", task.getException());
-//                }
-//            }
-//        });
+        /* Create the connection to the pictionary_pins collection*/
+//        pictionaryCollection = ((App)this.getApplication()).getMongoClient().getDatabase("GameGeo").getCollection("pictionary_pins");
 //
-//        final RemoteMongoClient mongoClient =
-//                stitchAppClient.getServiceClient(RemoteMongoClient.factory, "mongodb-atlas");
-
-//        coll = mongoClient.getDatabase("GameGeo").getCollection("pictionary_pins");
-        pictionaryCollection = ((App)this.getApplication()).getMongoClient().getDatabase("GameGeo").getCollection("pictionary_pins");
-
-        /* If a challenge was created, send it to the database*/
-        if(!newImage.equals("") && !newSecretWord.equals("") && newChallengeLat != 0 && newChallengeLong != 0) {
-//            PictionaryChallenge newChallenge = new PictionaryChallenge(newImage,
-//                    newSecretWord, newChallengeLat, newChallengeLong, "77");
-//            challenges.put(newChallenge.getId(), newChallenge);
-            insertPictionaryChallengToDatabase(newChallengeLat, newChallengeLong, newSecretWord, newImage);
-        }
-
-//        Document newItem = new Document()
-//                .append("lat", 1280)
-//                .append("long", 888)
-//                .append("secret_word", "HI");
-//
-//
-//        final Task <RemoteInsertOneResult> insertTask = pictionaryCollection.insertOne(newItem);
-//        insertTask.addOnCompleteListener(new OnCompleteListener <RemoteInsertOneResult> () {
-//            @Override
-//            public void onComplete(@NonNull Task <RemoteInsertOneResult> task) {
-//                if (task.isSuccessful()) {
-//                    Log.d("app", String.format("successfully inserted item with id %s",
-//                            task.getResult().getInsertedId()));
-//                } else {
-//                    Log.e("app", "failed to insert document with: ", task.getException());
-//                }
-//            }
-//        });
+//        /* If a challenge was created, send it to the database*/
+//        if(!newImage.equals("") && !newSecretWord.equals("") && newChallengeLat != 0 && newChallengeLong != 0) {
+//            insertPictionaryChallengToDatabase(newChallengeLat, newChallengeLong, newSecretWord, newImage);
+//        }
 
     }
 
@@ -351,14 +309,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             }
         });
-
-
-
-        /*
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));*/
 
     }
 
@@ -610,25 +560,25 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    private void insertPictionaryChallengToDatabase(double lat, double lon, String secret_word, String picture) {
-        Document newItem = new Document()
-                .append("lat", lat)
-                .append("long", lon)
-                .append("secret_word", secret_word)
-                .append("picture", picture);
-
-
-        final Task <RemoteInsertOneResult> insertTask = pictionaryCollection.insertOne(newItem);
-        insertTask.addOnCompleteListener(new OnCompleteListener <RemoteInsertOneResult> () {
-            @Override
-            public void onComplete(@NonNull Task <RemoteInsertOneResult> task) {
-                if (task.isSuccessful()) {
-                    Log.d("app", String.format("successfully inserted item with id %s",
-                            task.getResult().getInsertedId()));
-                } else {
-                    Log.e("app", "failed to insert document with: ", task.getException());
-                }
-            }
-        });
-    }
+//    private void insertPictionaryChallengToDatabase(double lat, double lon, String secret_word, String picture) {
+//        Document newItem = new Document()
+//                .append("lat", lat)
+//                .append("long", lon)
+//                .append("secret_word", secret_word)
+//                .append("picture", picture);
+//
+//
+//        final Task <RemoteInsertOneResult> insertTask = pictionaryCollection.insertOne(newItem);
+//        insertTask.addOnCompleteListener(new OnCompleteListener <RemoteInsertOneResult> () {
+//            @Override
+//            public void onComplete(@NonNull Task <RemoteInsertOneResult> task) {
+//                if (task.isSuccessful()) {
+//                    Log.d("app", String.format("successfully inserted item with id %s",
+//                            task.getResult().getInsertedId()));
+//                } else {
+//                    Log.e("app", "failed to insert document with: ", task.getException());
+//                }
+//            }
+//        });
+//    }
 }
