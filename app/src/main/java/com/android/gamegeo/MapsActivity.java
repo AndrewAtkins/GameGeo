@@ -183,7 +183,22 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        /* Button Handler for starting a challenge */
+        Button startChallengeButton = (Button) findViewById(R.id.start_challenge_button);
+        startChallengeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Bundle args = new Bundle();
+                args.putDouble("user_lat", lastKnownLat);
+                args.putDouble("user_long", lastKnownLong);
 
+                FragmentManager fm = getSupportFragmentManager();
+                StartChallengeSelectDialog dialog = new StartChallengeSelectDialog();
+                dialog.setArguments(args);
+
+                dialog.show(fm, "Challenge Select");
+            }
+        });
 
 
         createLocationCallback();
@@ -292,23 +307,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
                 return true;
 
-            }
-        });
-
-        /* Button Handler for starting a challenge */
-        Button startChallengeButton = (Button) findViewById(R.id.start_challenge_button);
-        startChallengeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Bundle args = new Bundle();
-                args.putDouble("user_lat", lastKnownLat);
-                args.putDouble("user_long", lastKnownLong);
-
-                FragmentManager fm = getSupportFragmentManager();
-                StartChallengeSelectDialog dialog = new StartChallengeSelectDialog();
-                dialog.setArguments(args);
-
-                dialog.show(fm, "Challenge Select");
             }
         });
 
