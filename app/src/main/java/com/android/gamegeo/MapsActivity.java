@@ -40,34 +40,19 @@ import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.net.PlacesClient;
-import com.mongodb.client.MongoClient;
-import com.mongodb.stitch.android.core.Stitch;
-import com.mongodb.stitch.android.core.StitchAppClient;
-import com.mongodb.stitch.android.core.auth.StitchUser;
-import com.mongodb.stitch.android.services.mongodb.remote.RemoteMongoClient;
-import com.mongodb.stitch.android.services.mongodb.remote.RemoteMongoCollection;
-import com.mongodb.stitch.core.auth.providers.anonymous.AnonymousCredential;
-import com.mongodb.stitch.core.services.mongodb.remote.RemoteInsertOneResult;
-import com.mongodb.stitch.core.services.mongodb.remote.RemoteUpdateOptions;
-import com.mongodb.stitch.core.services.mongodb.remote.RemoteUpdateResult;
 
-import org.bson.Document;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 
@@ -89,6 +74,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     // The geographical location where the device is currently located. That is, the last-known
     // location retrieved by the Fused Location Provider.
     private Location mLastKnownLocation;
+    // boundary for the camera
+    private LatLngBounds BOUNDS;
     private static final String KEY_LOCATION = "location";
     private static final String KEY_CAMERA_POSITION = "camera_position";
     private static final String KEY_REQUESTING_LOCATION_UPDATES = "requesting_updates";
@@ -115,7 +102,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private double lastKnownLat = 0;
     private double lastKnownLong = 0;
 
-//    /* DATABASE variables */
+    //    /* DATABASE variables */
 //    private RemoteMongoCollection<Document> pictionaryCollection;
     /*
         Challenge variables. This array will be populated with challenges pulled from the DB.
@@ -133,17 +120,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mRequestingLocationUpdates = savedInstanceState.getParcelable(KEY_REQUESTING_LOCATION_UPDATES);
         }
 
-        if(getIntent() != null && getIntent().getExtras() != null) {
-            if(getIntent().getExtras().getString("new_image") != null) {
+        if (getIntent() != null && getIntent().getExtras() != null) {
+            if (getIntent().getExtras().getString("new_image") != null) {
                 newImage = getIntent().getExtras().getString("new_image");
             }
-            if(getIntent().getExtras().getString("new_secret_word") != null) {
+            if (getIntent().getExtras().getString("new_secret_word") != null) {
                 newSecretWord = getIntent().getExtras().getString("new_secret_word");
             }
-            if(getIntent().getExtras().getDouble("new_lat") != 0) {
+            if (getIntent().getExtras().getDouble("new_lat") != 0) {
                 newChallengeLat = getIntent().getExtras().getDouble("new_lat");
             }
-            if(getIntent().getExtras().getDouble("new_long") != 0) {
+            if (getIntent().getExtras().getDouble("new_long") != 0) {
                 newChallengeLong = getIntent().getExtras().getDouble("new_long");
             }
         }
@@ -172,7 +159,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         challenges.put(testchallenge2.getId(), testchallenge2);
         challenges.put(testchallenge3.getId(), testchallenge3);
 
-        if(!newImage.equals("") && !newSecretWord.equals("") && newChallengeLat != 0 && newChallengeLong != 0) {
+        if (!newImage.equals("") && !newSecretWord.equals("") && newChallengeLat != 0 && newChallengeLong != 0) {
             PictionaryChallenge newChallenge = new PictionaryChallenge(newImage,
                     newSecretWord, newChallengeLat, newChallengeLong, "77");
             challenges.put(newChallenge.getId(), newChallenge);
@@ -205,13 +192,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         createLocationRequest();
         buildLocationSettingsRequest();
 
-        /* Create the connection to the pictionary_pins collection*/
-//        pictionaryCollection = ((App)this.getApplication()).getMongoClient().getDatabase("GameGeo").getCollection("pictionary_pins");
-//
-//        /* If a challenge was created, send it to the database*/
-//        if(!newImage.equals("") && !newSecretWord.equals("") && newChallengeLat != 0 && newChallengeLong != 0) {
-//            insertPictionaryChallengToDatabase(newChallengeLat, newChallengeLong, newSecretWord, newImage);
-//        }
 
     }
 
@@ -225,9 +205,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             } catch (SecurityException e) {
                 Log.e("Exception: %s", e.getMessage());
             }
-        }
-        else if(!mLocationPermissionGranted)
-        {
+        } else if (!mLocationPermissionGranted) {
             getLocationPermission();
         }
     }
@@ -281,9 +259,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         // Set properties of the map such as disabling panning
         setMapProperties();
 
-        // Create markers from what is in the challenges array list
-        createMarkers();
-
         mMap.setOnMarkerClickListener(new OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
@@ -330,14 +305,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                             // Set the map's camera position to the current location of the device.
                             mLastKnownLocation = task.getResult();
                             if (mLastKnownLocation != null) {
-                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
                                         new LatLng(mLastKnownLocation.getLatitude(),
                                                 mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));
                             }
                         } else {
                             Log.d(TAG, "Current location is null. Using defaults.");
                             Log.e(TAG, "Exception: %s", task.getException());
-                            mMap.moveCamera(CameraUpdateFactory
+                            mMap.animateCamera(CameraUpdateFactory
                                     .newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
                             mMap.getUiSettings().setMyLocationButtonEnabled(false);
                         }
@@ -364,8 +339,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mLocationPermissionGranted = true;
             mRequestingLocationUpdates = true;
 
-            if(mRequestingLocationUpdates)
-            {
+            if (mRequestingLocationUpdates) {
                 Log.i(TAG, "Permission granted, updates requested, starting location updates");
                 startLocationUpdates();
             }
@@ -408,34 +382,69 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         try {
             if (mLocationPermissionGranted) {
                 mMap.setMyLocationEnabled(true);
-                mMap.getUiSettings().setMyLocationButtonEnabled(true);
                 if (mLastKnownLocation != null) {
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                            new LatLng(mLastKnownLocation.getLatitude(),
-                                    mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));
+                    setBounds();
+                    mMap.setLatLngBoundsForCameraTarget(BOUNDS);
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(
+                            mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude())));
+
+                    // Create markers from what is in the challenges array list
+                    createMarkers();
+
                     lastKnownLat = mLastKnownLocation.getLatitude();
                     lastKnownLong = mLastKnownLocation.getLongitude();
+
                 }
             } else {
                 mMap.setMyLocationEnabled(false);
-                mMap.getUiSettings().setMyLocationButtonEnabled(false);
                 mLastKnownLocation = null;
                 getLocationPermission();
             }
         } catch (SecurityException e) {
             Log.e("Exception: %s", e.getMessage());
         }
+
     }
 
     /**
      * Sets properties of the map that we will always want such as not being able to pan and not being able to zoom out very far
      */
     private void setMapProperties() {
-//        mMap.getUiSettings().setScrollGesturesEnabled(false);
         mMap.setMaxZoomPreference(20);
         mMap.setMinZoomPreference(15);
-        //mMap.getUiSettings().setScrollGesturesEnabled(false);
-        //mMap.getUiSettings().setZoomGesturesEnabled(false);
+        mMap.getUiSettings().setMyLocationButtonEnabled(false);
+
+    }
+
+    /**
+     * Creates a LatLng Bounds for camera target.
+     */
+    private void setBounds() {
+        LatLngBounds.Builder latLngBoundBuilder = new LatLngBounds.Builder();
+
+        latLngBoundBuilder.include(new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()));
+        BOUNDS = latLngBoundBuilder.build();
+    }
+
+    /**
+     * Check is a marker is near a player
+     *
+     * @return true if marker is within a player's camera bounds
+     */
+    private boolean isMarkerWithinBounds(LatLng latLng) {
+        boolean isMarkerWithinBounds = false;
+
+
+    if (true)  // ****THIS CONDITIONAL NEED WORk****
+         {
+            /* Log.i("bounds", "bounds = " + BOUNDS.toString());
+             Log.i("bounds", "latLng  = " + latLng.toString());
+             Log.i("bounds", "bounds.contain = " + BOUNDS.contains(latLng));*/
+
+             isMarkerWithinBounds = true;
+        }
+
+        return isMarkerWithinBounds;
     }
 
     /**
@@ -538,47 +547,25 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
     private void createMarkers() {
-//        for(Challenge c: challenges) {
-//            LatLng challenge = new LatLng(c.getLatitude(), c.getLongitude());
-//            Marker m = mMap.addMarker(new MarkerOptions().position(challenge)
-//                    .title("Marker for a Pictionary Challenge"));
-//            m.setTag(c.getId());
-//        }
+
         for (Map.Entry c : challenges.entrySet()) {
             Challenge challenge = (PictionaryChallenge) c.getValue();
             LatLng cLatLong = new LatLng(challenge.getLatitude(), challenge.getLongitude());
-            Marker m = mMap.addMarker(new MarkerOptions().position(cLatLong)
-                    .title("Marker for a Pictionary Challenge"));
-            m.setTag(challenge.getId());
-            // set the icon of the marker
-            int height = 150;
-            int width = 150;
-            Bitmap b = BitmapFactory.decodeResource(getResources(), R.drawable.ic_pictionary_marker);
-            Bitmap smallMarker = Bitmap.createScaledBitmap(b, width, height, false);
-            BitmapDescriptor icon = BitmapDescriptorFactory.fromBitmap(smallMarker);
-            m.setIcon(icon);
+            if (isMarkerWithinBounds(cLatLong)) {
+                Marker m = mMap.addMarker(new MarkerOptions().position(cLatLong)
+                        .title("Marker for a Pictionary Challenge"));
+                m.setTag(challenge.getId());
+                // set the icon of the marker
+                int height = 150;
+                int width = 150;
+                Bitmap b = BitmapFactory.decodeResource(getResources(), R.drawable.ic_pictionary_marker);
+                Bitmap smallMarker = Bitmap.createScaledBitmap(b, width, height, false);
+                BitmapDescriptor icon = BitmapDescriptorFactory.fromBitmap(smallMarker);
+                m.setIcon(icon);
+            }
+
         }
     }
 
-//    private void insertPictionaryChallengToDatabase(double lat, double lon, String secret_word, String picture) {
-//        Document newItem = new Document()
-//                .append("lat", lat)
-//                .append("long", lon)
-//                .append("secret_word", secret_word)
-//                .append("picture", picture);
-//
-//
-//        final Task <RemoteInsertOneResult> insertTask = pictionaryCollection.insertOne(newItem);
-//        insertTask.addOnCompleteListener(new OnCompleteListener <RemoteInsertOneResult> () {
-//            @Override
-//            public void onComplete(@NonNull Task <RemoteInsertOneResult> task) {
-//                if (task.isSuccessful()) {
-//                    Log.d("app", String.format("successfully inserted item with id %s",
-//                            task.getResult().getInsertedId()));
-//                } else {
-//                    Log.e("app", "failed to insert document with: ", task.getException());
-//                }
-//            }
-//        });
-//    }
+
 }
