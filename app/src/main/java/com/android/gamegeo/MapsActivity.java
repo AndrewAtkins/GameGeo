@@ -335,14 +335,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                             // Set the map's camera position to the current location of the device.
                             mLastKnownLocation = task.getResult();
                             if (mLastKnownLocation != null) {
-                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
                                         new LatLng(mLastKnownLocation.getLatitude(),
                                                 mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));
                             }
                         } else {
                             Log.d(TAG, "Current location is null. Using defaults.");
                             Log.e(TAG, "Exception: %s", task.getException());
-                            mMap.moveCamera(CameraUpdateFactory
+                            mMap.animateCamera(CameraUpdateFactory
                                     .newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
                             mMap.getUiSettings().setMyLocationButtonEnabled(false);
                         }
@@ -416,12 +416,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if (mLastKnownLocation != null) {
                     setBounds();
                     mMap.setLatLngBoundsForCameraTarget(BOUNDS);
-                    mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(
+                    mMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(
                             mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude())));
 
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                    mMap.animateCamera(CameraUpdateFactory.newLatLng(
                             new LatLng(mLastKnownLocation.getLatitude(),
-                                    mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));
+                                    mLastKnownLocation.getLongitude())));
+
                     lastKnownLat = mLastKnownLocation.getLatitude();
                     lastKnownLong = mLastKnownLocation.getLongitude();
 
