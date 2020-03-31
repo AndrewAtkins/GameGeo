@@ -40,34 +40,19 @@ import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.net.PlacesClient;
-import com.mongodb.client.MongoClient;
-import com.mongodb.stitch.android.core.Stitch;
-import com.mongodb.stitch.android.core.StitchAppClient;
-import com.mongodb.stitch.android.core.auth.StitchUser;
-import com.mongodb.stitch.android.services.mongodb.remote.RemoteMongoClient;
-import com.mongodb.stitch.android.services.mongodb.remote.RemoteMongoCollection;
-import com.mongodb.stitch.core.auth.providers.anonymous.AnonymousCredential;
-import com.mongodb.stitch.core.services.mongodb.remote.RemoteInsertOneResult;
-import com.mongodb.stitch.core.services.mongodb.remote.RemoteUpdateOptions;
-import com.mongodb.stitch.core.services.mongodb.remote.RemoteUpdateResult;
 
-import org.bson.Document;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 
@@ -89,6 +74,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     // The geographical location where the device is currently located. That is, the last-known
     // location retrieved by the Fused Location Provider.
     private Location mLastKnownLocation;
+    // boundary for the camera
+    private LatLngBounds BOUNDS;
     private static final String KEY_LOCATION = "location";
     private static final String KEY_CAMERA_POSITION = "camera_position";
     private static final String KEY_REQUESTING_LOCATION_UPDATES = "requesting_updates";
@@ -205,13 +192,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         createLocationRequest();
         buildLocationSettingsRequest();
 
-        /* Create the connection to the pictionary_pins collection*/
-//        pictionaryCollection = ((App)this.getApplication()).getMongoClient().getDatabase("GameGeo").getCollection("pictionary_pins");
-//
-//        /* If a challenge was created, send it to the database*/
-//        if(!newImage.equals("") && !newSecretWord.equals("") && newChallengeLat != 0 && newChallengeLong != 0) {
-//            insertPictionaryChallengToDatabase(newChallengeLat, newChallengeLong, newSecretWord, newImage);
-//        }
 
     }
 
@@ -330,14 +310,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                             // Set the map's camera position to the current location of the device.
                             mLastKnownLocation = task.getResult();
                             if (mLastKnownLocation != null) {
-                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
                                         new LatLng(mLastKnownLocation.getLatitude(),
                                                 mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));
                             }
                         } else {
                             Log.d(TAG, "Current location is null. Using defaults.");
                             Log.e(TAG, "Exception: %s", task.getException());
-                            mMap.moveCamera(CameraUpdateFactory
+                            mMap.animateCamera(CameraUpdateFactory
                                     .newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
                             mMap.getUiSettings().setMyLocationButtonEnabled(false);
                         }
@@ -408,17 +388,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         try {
             if (mLocationPermissionGranted) {
                 mMap.setMyLocationEnabled(true);
-                mMap.getUiSettings().setMyLocationButtonEnabled(true);
                 if (mLastKnownLocation != null) {
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                            new LatLng(mLastKnownLocation.getLatitude(),
-                                    mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));
+                    setBounds();
+                    mMap.setLatLngBoundsForCameraTarget(BOUNDS);
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(
+                            mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude())));
+
                     lastKnownLat = mLastKnownLocation.getLatitude();
                     lastKnownLong = mLastKnownLocation.getLongitude();
                 }
             } else {
                 mMap.setMyLocationEnabled(false);
-                mMap.getUiSettings().setMyLocationButtonEnabled(false);
                 mLastKnownLocation = null;
                 getLocationPermission();
             }
@@ -431,11 +411,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
      * Sets properties of the map that we will always want such as not being able to pan and not being able to zoom out very far
      */
     private void setMapProperties() {
-//        mMap.getUiSettings().setScrollGesturesEnabled(false);
         mMap.setMaxZoomPreference(20);
         mMap.setMinZoomPreference(15);
-        //mMap.getUiSettings().setScrollGesturesEnabled(false);
-        //mMap.getUiSettings().setZoomGesturesEnabled(false);
+        mMap.getUiSettings().setMyLocationButtonEnabled(false);
+
+    }
+
+    /**
+     * Creates a LatLng Bounds for camera target.
+     */
+    private void setBounds() {
+        LatLngBounds.Builder latLngBoundBuilder = new LatLngBounds.Builder();
+
+        latLngBoundBuilder.include(new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()));
+        BOUNDS = latLngBoundBuilder.build();
     }
 
     /**
