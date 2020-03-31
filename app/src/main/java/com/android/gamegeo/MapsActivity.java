@@ -275,7 +275,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 dialog.show(fm, "Challenge Select");
             }
         });
-        
+
         /*
             Here we will need to call the database and populate the challenges array
          */
