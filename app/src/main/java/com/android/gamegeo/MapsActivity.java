@@ -44,14 +44,31 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.net.PlacesClient;
+import com.mongodb.client.MongoClient;
+import com.mongodb.stitch.android.core.Stitch;
+import com.mongodb.stitch.android.core.StitchAppClient;
+import com.mongodb.stitch.android.core.auth.StitchUser;
+import com.mongodb.stitch.android.services.mongodb.remote.RemoteMongoClient;
+import com.mongodb.stitch.android.services.mongodb.remote.RemoteMongoCollection;
+import com.mongodb.stitch.core.auth.providers.anonymous.AnonymousCredential;
+import com.mongodb.stitch.core.services.mongodb.remote.RemoteInsertOneResult;
+import com.mongodb.stitch.core.services.mongodb.remote.RemoteUpdateOptions;
+import com.mongodb.stitch.core.services.mongodb.remote.RemoteUpdateResult;
 
+import org.bson.Document;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -93,6 +110,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LocationSettingsRequest mLocationSettingsRequest;
     private boolean mRequestingLocationUpdates;
 
+    /* PLACEHOLDER: variables for creating new challenge on map*/
+    private String newImage = "";
+    private String newSecretWord = "";
+    private double newChallengeLat = 0;
+    private double newChallengeLong = 0;
+    private double lastKnownLat = 0;
+    private double lastKnownLong = 0;
+
+//    /* DATABASE variables */
+//    private RemoteMongoCollection<Document> pictionaryCollection;
     /*
         Challenge variables. This array will be populated with challenges pulled from the DB.
      */
@@ -108,6 +135,22 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mLastKnownLocation = savedInstanceState.getParcelable(KEY_LOCATION);
             mRequestingLocationUpdates = savedInstanceState.getParcelable(KEY_REQUESTING_LOCATION_UPDATES);
         }
+
+        if(getIntent() != null && getIntent().getExtras() != null) {
+            if(getIntent().getExtras().getString("new_image") != null) {
+                newImage = getIntent().getExtras().getString("new_image");
+            }
+            if(getIntent().getExtras().getString("new_secret_word") != null) {
+                newSecretWord = getIntent().getExtras().getString("new_secret_word");
+            }
+            if(getIntent().getExtras().getDouble("new_lat") != 0) {
+                newChallengeLat = getIntent().getExtras().getDouble("new_lat");
+            }
+            if(getIntent().getExtras().getDouble("new_long") != 0) {
+                newChallengeLong = getIntent().getExtras().getDouble("new_long");
+            }
+        }
+
         setContentView(R.layout.activity_maps);
 
 
@@ -132,6 +175,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         challenges.put(testchallenge2.getId(), testchallenge2);
         challenges.put(testchallenge3.getId(), testchallenge3);
 
+        if(!newImage.equals("") && !newSecretWord.equals("") && newChallengeLat != 0 && newChallengeLong != 0) {
+            PictionaryChallenge newChallenge = new PictionaryChallenge(newImage,
+                    newSecretWord, newChallengeLat, newChallengeLong, "77");
+            challenges.put(newChallenge.getId(), newChallenge);
+        }
+
         // Build the Map
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -142,9 +191,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         startChallengeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // do whatever you want on click
+                Bundle args = new Bundle();
+                args.putDouble("user_lat", lastKnownLat);
+                args.putDouble("user_long", lastKnownLong);
+
                 FragmentManager fm = getSupportFragmentManager();
                 StartChallengeSelectDialog dialog = new StartChallengeSelectDialog();
+                dialog.setArguments(args);
+
                 dialog.show(fm, "Challenge Select");
             }
         });
@@ -153,6 +207,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         createLocationCallback();
         createLocationRequest();
         buildLocationSettingsRequest();
+
+        /* Create the connection to the pictionary_pins collection*/
+//        pictionaryCollection = ((App)this.getApplication()).getMongoClient().getDatabase("GameGeo").getCollection("pictionary_pins");
+//
+//        /* If a challenge was created, send it to the database*/
+//        if(!newImage.equals("") && !newSecretWord.equals("") && newChallengeLat != 0 && newChallengeLong != 0) {
+//            insertPictionaryChallengToDatabase(newChallengeLat, newChallengeLong, newSecretWord, newImage);
+//        }
 
     }
 
@@ -252,14 +314,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             }
         });
-
-
-
-        /*
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));*/
 
     }
 
@@ -364,6 +418,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     mMap.setLatLngBoundsForCameraTarget(BOUNDS);
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(
                             mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude())));
+
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                            new LatLng(mLastKnownLocation.getLatitude(),
+                                    mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));
+                    lastKnownLat = mLastKnownLocation.getLatitude();
+                    lastKnownLong = mLastKnownLocation.getLongitude();
+
                 }
             } else {
                 mMap.setMyLocationEnabled(false);
@@ -519,4 +580,26 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             m.setIcon(icon);
         }
     }
+
+//    private void insertPictionaryChallengToDatabase(double lat, double lon, String secret_word, String picture) {
+//        Document newItem = new Document()
+//                .append("lat", lat)
+//                .append("long", lon)
+//                .append("secret_word", secret_word)
+//                .append("picture", picture);
+//
+//
+//        final Task <RemoteInsertOneResult> insertTask = pictionaryCollection.insertOne(newItem);
+//        insertTask.addOnCompleteListener(new OnCompleteListener <RemoteInsertOneResult> () {
+//            @Override
+//            public void onComplete(@NonNull Task <RemoteInsertOneResult> task) {
+//                if (task.isSuccessful()) {
+//                    Log.d("app", String.format("successfully inserted item with id %s",
+//                            task.getResult().getInsertedId()));
+//                } else {
+//                    Log.e("app", "failed to insert document with: ", task.getException());
+//                }
+//            }
+//        });
+//    }
 }
