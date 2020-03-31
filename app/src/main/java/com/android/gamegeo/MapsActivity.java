@@ -560,25 +560,5 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-//    private void insertPictionaryChallengToDatabase(double lat, double lon, String secret_word, String picture) {
-//        Document newItem = new Document()
-//                .append("lat", lat)
-//                .append("long", lon)
-//                .append("secret_word", secret_word)
-//                .append("picture", picture);
-//
-//
-//        final Task <RemoteInsertOneResult> insertTask = pictionaryCollection.insertOne(newItem);
-//        insertTask.addOnCompleteListener(new OnCompleteListener <RemoteInsertOneResult> () {
-//            @Override
-//            public void onComplete(@NonNull Task <RemoteInsertOneResult> task) {
-//                if (task.isSuccessful()) {
-//                    Log.d("app", String.format("successfully inserted item with id %s",
-//                            task.getResult().getInsertedId()));
-//                } else {
-//                    Log.e("app", "failed to insert document with: ", task.getException());
-//                }
-//            }
-//        });
-//    }
+
 }
