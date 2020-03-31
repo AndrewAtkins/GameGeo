@@ -102,7 +102,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private double lastKnownLat = 0;
     private double lastKnownLong = 0;
 
-//    /* DATABASE variables */
+    //    /* DATABASE variables */
 //    private RemoteMongoCollection<Document> pictionaryCollection;
     /*
         Challenge variables. This array will be populated with challenges pulled from the DB.
@@ -120,17 +120,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mRequestingLocationUpdates = savedInstanceState.getParcelable(KEY_REQUESTING_LOCATION_UPDATES);
         }
 
-        if(getIntent() != null && getIntent().getExtras() != null) {
-            if(getIntent().getExtras().getString("new_image") != null) {
+        if (getIntent() != null && getIntent().getExtras() != null) {
+            if (getIntent().getExtras().getString("new_image") != null) {
                 newImage = getIntent().getExtras().getString("new_image");
             }
-            if(getIntent().getExtras().getString("new_secret_word") != null) {
+            if (getIntent().getExtras().getString("new_secret_word") != null) {
                 newSecretWord = getIntent().getExtras().getString("new_secret_word");
             }
-            if(getIntent().getExtras().getDouble("new_lat") != 0) {
+            if (getIntent().getExtras().getDouble("new_lat") != 0) {
                 newChallengeLat = getIntent().getExtras().getDouble("new_lat");
             }
-            if(getIntent().getExtras().getDouble("new_long") != 0) {
+            if (getIntent().getExtras().getDouble("new_long") != 0) {
                 newChallengeLong = getIntent().getExtras().getDouble("new_long");
             }
         }
@@ -159,7 +159,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         challenges.put(testchallenge2.getId(), testchallenge2);
         challenges.put(testchallenge3.getId(), testchallenge3);
 
-        if(!newImage.equals("") && !newSecretWord.equals("") && newChallengeLat != 0 && newChallengeLong != 0) {
+        if (!newImage.equals("") && !newSecretWord.equals("") && newChallengeLat != 0 && newChallengeLong != 0) {
             PictionaryChallenge newChallenge = new PictionaryChallenge(newImage,
                     newSecretWord, newChallengeLat, newChallengeLong, "77");
             challenges.put(newChallenge.getId(), newChallenge);
@@ -205,9 +205,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             } catch (SecurityException e) {
                 Log.e("Exception: %s", e.getMessage());
             }
-        }
-        else if(!mLocationPermissionGranted)
-        {
+        } else if (!mLocationPermissionGranted) {
             getLocationPermission();
         }
     }
@@ -260,9 +258,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         // Set properties of the map such as disabling panning
         setMapProperties();
-
-        // Create markers from what is in the challenges array list
-        createMarkers();
 
         mMap.setOnMarkerClickListener(new OnMarkerClickListener() {
             @Override
@@ -344,8 +339,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mLocationPermissionGranted = true;
             mRequestingLocationUpdates = true;
 
-            if(mRequestingLocationUpdates)
-            {
+            if (mRequestingLocationUpdates) {
                 Log.i(TAG, "Permission granted, updates requested, starting location updates");
                 startLocationUpdates();
             }
@@ -394,8 +388,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(
                             mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude())));
 
+                    // Create markers from what is in the challenges array list
+                    createMarkers();
+
                     lastKnownLat = mLastKnownLocation.getLatitude();
                     lastKnownLong = mLastKnownLocation.getLongitude();
+
                 }
             } else {
                 mMap.setMyLocationEnabled(false);
@@ -405,6 +403,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         } catch (SecurityException e) {
             Log.e("Exception: %s", e.getMessage());
         }
+
     }
 
     /**
@@ -425,6 +424,27 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         latLngBoundBuilder.include(new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()));
         BOUNDS = latLngBoundBuilder.build();
+    }
+
+    /**
+     * Check is a marker is near a player
+     *
+     * @return true if marker is within a player's camera bounds
+     */
+    private boolean isMarkerWithinBounds(LatLng latLng) {
+        boolean isMarkerWithinBounds = false;
+
+
+    if (true)  // ****THIS CONDITIONAL NEED WORk****
+         {
+            /* Log.i("bounds", "bounds = " + BOUNDS.toString());
+             Log.i("bounds", "latLng  = " + latLng.toString());
+             Log.i("bounds", "bounds.contain = " + BOUNDS.contains(latLng));*/
+
+             isMarkerWithinBounds = true;
+        }
+
+        return isMarkerWithinBounds;
     }
 
     /**
@@ -527,47 +547,25 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
     private void createMarkers() {
-//        for(Challenge c: challenges) {
-//            LatLng challenge = new LatLng(c.getLatitude(), c.getLongitude());
-//            Marker m = mMap.addMarker(new MarkerOptions().position(challenge)
-//                    .title("Marker for a Pictionary Challenge"));
-//            m.setTag(c.getId());
-//        }
+
         for (Map.Entry c : challenges.entrySet()) {
             Challenge challenge = (PictionaryChallenge) c.getValue();
             LatLng cLatLong = new LatLng(challenge.getLatitude(), challenge.getLongitude());
-            Marker m = mMap.addMarker(new MarkerOptions().position(cLatLong)
-                    .title("Marker for a Pictionary Challenge"));
-            m.setTag(challenge.getId());
-            // set the icon of the marker
-            int height = 150;
-            int width = 150;
-            Bitmap b = BitmapFactory.decodeResource(getResources(), R.drawable.ic_pictionary_marker);
-            Bitmap smallMarker = Bitmap.createScaledBitmap(b, width, height, false);
-            BitmapDescriptor icon = BitmapDescriptorFactory.fromBitmap(smallMarker);
-            m.setIcon(icon);
+            if (isMarkerWithinBounds(cLatLong)) {
+                Marker m = mMap.addMarker(new MarkerOptions().position(cLatLong)
+                        .title("Marker for a Pictionary Challenge"));
+                m.setTag(challenge.getId());
+                // set the icon of the marker
+                int height = 150;
+                int width = 150;
+                Bitmap b = BitmapFactory.decodeResource(getResources(), R.drawable.ic_pictionary_marker);
+                Bitmap smallMarker = Bitmap.createScaledBitmap(b, width, height, false);
+                BitmapDescriptor icon = BitmapDescriptorFactory.fromBitmap(smallMarker);
+                m.setIcon(icon);
+            }
+
         }
     }
 
-//    private void insertPictionaryChallengToDatabase(double lat, double lon, String secret_word, String picture) {
-//        Document newItem = new Document()
-//                .append("lat", lat)
-//                .append("long", lon)
-//                .append("secret_word", secret_word)
-//                .append("picture", picture);
-//
-//
-//        final Task <RemoteInsertOneResult> insertTask = pictionaryCollection.insertOne(newItem);
-//        insertTask.addOnCompleteListener(new OnCompleteListener <RemoteInsertOneResult> () {
-//            @Override
-//            public void onComplete(@NonNull Task <RemoteInsertOneResult> task) {
-//                if (task.isSuccessful()) {
-//                    Log.d("app", String.format("successfully inserted item with id %s",
-//                            task.getResult().getInsertedId()));
-//                } else {
-//                    Log.e("app", "failed to insert document with: ", task.getException());
-//                }
-//            }
-//        });
-//    }
+
 }
