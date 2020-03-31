@@ -1,5 +1,6 @@
 package com.android.gamegeo;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.ActionBar;
@@ -8,6 +9,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -23,10 +25,19 @@ import android.widget.Toast;
 
 import android.widget.AdapterView.OnItemSelectedListener;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.mongodb.stitch.android.services.mongodb.remote.RemoteMongoCollection;
+import com.mongodb.stitch.core.services.mongodb.remote.RemoteInsertOneResult;
+
+import org.bson.Document;
+
 public class PictionaryActivity extends AppCompatActivity implements OnItemSelectedListener {
 
     private PaintView paintView;
     private final Context c = this;
+    /* DATABASE variables */
+    private RemoteMongoCollection<Document> pictionaryCollection;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,11 +107,14 @@ public class PictionaryActivity extends AppCompatActivity implements OnItemSelec
                     /* PLACEHOLDER: Once we have the database set up, we will want to push this data to the database rather than sending it as an extra*/
                     Intent myIntent = new Intent(getApplicationContext(), MapsActivity.class);
                     Bundle bundle = new Bundle();
+                    /* Send the picture to the maps activity so it can display. Only necessary until we get the data being pulled from the database*/
                     bundle.putString("new_image", imageEncoded);
                     bundle.putString("new_secret_word", secretWord);
                     bundle.putDouble("new_lat", getIntent().getExtras().getDouble("user_lat"));
                     bundle.putDouble("new_long", getIntent().getExtras().getDouble("user_long"));
                     myIntent.putExtras(bundle);
+                    /* Insert the picture the user created into the database */
+                    insertPictionaryChallengToDatabase(getIntent().getExtras().getDouble("user_lat"),getIntent().getExtras().getDouble("user_long"),secretWord,imageEncoded);
                     startActivityForResult(myIntent, 0);
 
                 } else {
@@ -108,6 +122,9 @@ public class PictionaryActivity extends AppCompatActivity implements OnItemSelec
                 }
             }
         });
+
+        /* Set up a connection to the pictionary_pins collection */
+        pictionaryCollection = ((App)this.getApplication()).getMongoClient().getDatabase("GameGeo").getCollection("pictionary_pins");
     }
     /*
         Method for the back button
@@ -174,5 +191,27 @@ public class PictionaryActivity extends AppCompatActivity implements OnItemSelec
 
     public void onNothingSelected(AdapterView<?> parent) {
         // Another interface callback
+    }
+
+    private void insertPictionaryChallengToDatabase(double lat, double lon, String secret_word, String picture) {
+        Document newItem = new Document()
+                .append("lat", lat)
+                .append("long", lon)
+                .append("secret_word", secret_word)
+                .append("picture", picture);
+
+
+        final Task<RemoteInsertOneResult> insertTask = pictionaryCollection.insertOne(newItem);
+        insertTask.addOnCompleteListener(new OnCompleteListener<RemoteInsertOneResult>() {
+            @Override
+            public void onComplete(@NonNull Task <RemoteInsertOneResult> task) {
+                if (task.isSuccessful()) {
+                    Log.d("app", String.format("successfully inserted item with id %s",
+                            task.getResult().getInsertedId()));
+                } else {
+                    Log.e("app", "failed to insert document with: ", task.getException());
+                }
+            }
+        });
     }
 }

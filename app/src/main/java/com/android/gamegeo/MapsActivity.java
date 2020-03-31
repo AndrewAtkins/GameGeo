@@ -43,14 +43,31 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.net.PlacesClient;
+import com.mongodb.client.MongoClient;
+import com.mongodb.stitch.android.core.Stitch;
+import com.mongodb.stitch.android.core.StitchAppClient;
+import com.mongodb.stitch.android.core.auth.StitchUser;
+import com.mongodb.stitch.android.services.mongodb.remote.RemoteMongoClient;
+import com.mongodb.stitch.android.services.mongodb.remote.RemoteMongoCollection;
+import com.mongodb.stitch.core.auth.providers.anonymous.AnonymousCredential;
+import com.mongodb.stitch.core.services.mongodb.remote.RemoteInsertOneResult;
+import com.mongodb.stitch.core.services.mongodb.remote.RemoteUpdateOptions;
+import com.mongodb.stitch.core.services.mongodb.remote.RemoteUpdateResult;
 
+import org.bson.Document;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -97,6 +114,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private double newChallengeLong = 0;
     private double lastKnownLat = 0;
     private double lastKnownLong = 0;
+
+//    /* DATABASE variables */
+//    private RemoteMongoCollection<Document> pictionaryCollection;
     /*
         Challenge variables. This array will be populated with challenges pulled from the DB.
      */
@@ -184,6 +204,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         createLocationCallback();
         createLocationRequest();
         buildLocationSettingsRequest();
+
+        /* Create the connection to the pictionary_pins collection*/
+//        pictionaryCollection = ((App)this.getApplication()).getMongoClient().getDatabase("GameGeo").getCollection("pictionary_pins");
+//
+//        /* If a challenge was created, send it to the database*/
+//        if(!newImage.equals("") && !newSecretWord.equals("") && newChallengeLat != 0 && newChallengeLong != 0) {
+//            insertPictionaryChallengToDatabase(newChallengeLat, newChallengeLong, newSecretWord, newImage);
+//        }
 
     }
 
@@ -281,14 +309,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             }
         });
-
-
-
-        /*
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));*/
 
     }
 
@@ -539,4 +559,26 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             m.setIcon(icon);
         }
     }
+
+//    private void insertPictionaryChallengToDatabase(double lat, double lon, String secret_word, String picture) {
+//        Document newItem = new Document()
+//                .append("lat", lat)
+//                .append("long", lon)
+//                .append("secret_word", secret_word)
+//                .append("picture", picture);
+//
+//
+//        final Task <RemoteInsertOneResult> insertTask = pictionaryCollection.insertOne(newItem);
+//        insertTask.addOnCompleteListener(new OnCompleteListener <RemoteInsertOneResult> () {
+//            @Override
+//            public void onComplete(@NonNull Task <RemoteInsertOneResult> task) {
+//                if (task.isSuccessful()) {
+//                    Log.d("app", String.format("successfully inserted item with id %s",
+//                            task.getResult().getInsertedId()));
+//                } else {
+//                    Log.e("app", "failed to insert document with: ", task.getException());
+//                }
+//            }
+//        });
+//    }
 }
