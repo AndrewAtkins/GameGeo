@@ -51,6 +51,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.net.PlacesClient;
 
+import org.bson.Document;
+
 
 import java.util.HashMap;
 import java.util.Map;
@@ -95,10 +97,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private boolean mRequestingLocationUpdates;
 
     /* PLACEHOLDER: variables for creating new challenge on map*/
-    private String newImage = "";
-    private String newSecretWord = "";
-    private double newChallengeLat = 0;
-    private double newChallengeLong = 0;
     private double lastKnownLat = 0;
     private double lastKnownLong = 0;
 
@@ -120,21 +118,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mRequestingLocationUpdates = savedInstanceState.getParcelable(KEY_REQUESTING_LOCATION_UPDATES);
         }
 
-        if (getIntent() != null && getIntent().getExtras() != null) {
-            if (getIntent().getExtras().getString("new_image") != null) {
-                newImage = getIntent().getExtras().getString("new_image");
-            }
-            if (getIntent().getExtras().getString("new_secret_word") != null) {
-                newSecretWord = getIntent().getExtras().getString("new_secret_word");
-            }
-            if (getIntent().getExtras().getDouble("new_lat") != 0) {
-                newChallengeLat = getIntent().getExtras().getDouble("new_lat");
-            }
-            if (getIntent().getExtras().getDouble("new_long") != 0) {
-                newChallengeLong = getIntent().getExtras().getDouble("new_long");
-            }
-        }
-
         setContentView(R.layout.activity_maps);
 
 
@@ -149,21 +132,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         /*
             Here we will need to call the database and populate the challenges array
          */
-        PictionaryChallenge testchallenge = new PictionaryChallenge("iVBORw0KGgoAAAANSUhEUgAAAH0AAABKCAIAAAAZncxnAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAASdAAAEnQB3mYfeAAABAZJREFUeF7tmr9S3DAQh32pqFPBTDJDkfQ8AnT3CFdSQnf9FXQwPAF00FJRcu/CUKWAJmmhu/wmu6MYj/9IWkkr2/rmJpF1F0v7aW8t+7LY7XZVITlf+O9CWop3HXTqzJ/vP7nVxtdfz9yaLum81133m+1flTrjXaHo3o3EGI66Vij/9YjonaSoKMh/PcJ7j5rgQhRToUFI7/lE1U8O8wzmfSzSDboTDrl/H5F0QLMl++kJ4x2zH5d0QnHOAbxrpUwQoB7zTx9CmHwfY7IbVCYv9T7SCqNOyOvqeKFqwwdJyMX7w8PD5eUlH8yAXLy/vLxsNhs+mAHS+6bJ1HeqM8limUh9l5cpMp6syrvle+u0csh3SEeZkj/zsPEeJF5b72ZCjVHRn4P3UAyGQx7kIQ/UGQxDL4xEL35jrpABsi+h0zvpRmNWuhHpoNMg6lu8z9O4E3It7fk+Z+MI3CaXLT/WxUT2kVp4q296x4lmm+kG+5Tnljsl33Uo3nUo3nUo3nUo3tsRbhMHKd51mL737XZ7cnJyf3/Px5mw+8zvbz+4ZYfr59Ozv7+PMPf29vjYGpvQvMNvyXfUNXrx8Zi5vb19e3tD4+Pjg3pygf23gcWsv7j3M139PTw9PR0fH9/d3fFxTCjZwWq14i5rBkPr0TKIw+9NXd8A19vlg4MD5CC++O/v79wVjcViQQ2MhRGpbQni7QrNqPB+VKDwu7ZxIRx6EBSZ8/NzanuM1VNpvXX/BxOS4PFF44HFQw8iKTLAu4bYMOV8FxYZ/BkgrzuYxX2Tq3QinnRQ7lebINN7KnsopN6RFN6zjHoPSdt2PxBU1GQHCvluvvVmsxGD6+trahwdHVHDBo/LlSf/rq4iXK/7V1dXPHZVXVxccG9ozGbm8fGRu3qR3AR5oOAdrNdrkgIiqeez2yVWSuOEjnds7JbLJYuJoP719ZVPPWHvQK7+8PAw4BObs7MzOi2KO3f1MiPvoKEe11t+Q8bNzQ2f0a64p5cOwngH3upPT09ZUlXhkstv+IIKY/ZLWFTu7WWO3glzmYUyZCv3emFOhQqDReXeblSkgyy8Q1D9Vl5ymfXYPnIrLcG8A0kM9U098FbP/976vmQi3oVZL9zhuG4fwRS8E2TfL56GeuBkP//toyG8d4O3+voOh7Cxj9LEn86+uIOI3gElvkd4jXLvRM7bR0Nc74SfeuBhH9IHt480n+l7J7zjtLe/Wq0GpQNd44T091UnzC8kiZ5xt5HuCXsvSb0b0gefw5LX0fEOjAgQ20UmOV5HzXudqF4ylA6y8A6Cp785YYbSQS7e60jWIHPdhhy9G0iipUGnD6uTtXeinv49jMU4MQLvk6T8Pz0dincdincdincNquovAPNgdJ320sgAAAAASUVORK5CYII=",
-                "Face", 30.342330, -87.096400, "999");
-        PictionaryChallenge testchallenge2 = new PictionaryChallenge("iVBORw0KGgoAAAANSUhEUgAAAH0AAABKCAIAAAAZncxnAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAASdAAAEnQB3mYfeAAABAZJREFUeF7tmr9S3DAQh32pqFPBTDJDkfQ8AnT3CFdSQnf9FXQwPAF00FJRcu/CUKWAJmmhu/wmu6MYj/9IWkkr2/rmJpF1F0v7aW8t+7LY7XZVITlf+O9CWop3HXTqzJ/vP7nVxtdfz9yaLum81133m+1flTrjXaHo3o3EGI66Vij/9YjonaSoKMh/PcJ7j5rgQhRToUFI7/lE1U8O8wzmfSzSDboTDrl/H5F0QLMl++kJ4x2zH5d0QnHOAbxrpUwQoB7zTx9CmHwfY7IbVCYv9T7SCqNOyOvqeKFqwwdJyMX7w8PD5eUlH8yAXLy/vLxsNhs+mAHS+6bJ1HeqM8limUh9l5cpMp6syrvle+u0csh3SEeZkj/zsPEeJF5b72ZCjVHRn4P3UAyGQx7kIQ/UGQxDL4xEL35jrpABsi+h0zvpRmNWuhHpoNMg6lu8z9O4E3It7fk+Z+MI3CaXLT/WxUT2kVp4q296x4lmm+kG+5Tnljsl33Uo3nUo3nUo3nUo3tsRbhMHKd51mL737XZ7cnJyf3/Px5mw+8zvbz+4ZYfr59Ozv7+PMPf29vjYGpvQvMNvyXfUNXrx8Zi5vb19e3tD4+Pjg3pygf23gcWsv7j3M139PTw9PR0fH9/d3fFxTCjZwWq14i5rBkPr0TKIw+9NXd8A19vlg4MD5CC++O/v79wVjcViQQ2MhRGpbQni7QrNqPB+VKDwu7ZxIRx6EBSZ8/NzanuM1VNpvXX/BxOS4PFF44HFQw8iKTLAu4bYMOV8FxYZ/BkgrzuYxX2Tq3QinnRQ7lebINN7KnsopN6RFN6zjHoPSdt2PxBU1GQHCvluvvVmsxGD6+trahwdHVHDBo/LlSf/rq4iXK/7V1dXPHZVXVxccG9ozGbm8fGRu3qR3AR5oOAdrNdrkgIiqeez2yVWSuOEjnds7JbLJYuJoP719ZVPPWHvQK7+8PAw4BObs7MzOi2KO3f1MiPvoKEe11t+Q8bNzQ2f0a64p5cOwngH3upPT09ZUlXhkstv+IIKY/ZLWFTu7WWO3glzmYUyZCv3emFOhQqDReXeblSkgyy8Q1D9Vl5ymfXYPnIrLcG8A0kM9U098FbP/976vmQi3oVZL9zhuG4fwRS8E2TfL56GeuBkP//toyG8d4O3+voOh7Cxj9LEn86+uIOI3gElvkd4jXLvRM7bR0Nc74SfeuBhH9IHt480n+l7J7zjtLe/Wq0GpQNd44T091UnzC8kiZ5xt5HuCXsvSb0b0gefw5LX0fEOjAgQ20UmOV5HzXudqF4ylA6y8A6Cp785YYbSQS7e60jWIHPdhhy9G0iipUGnD6uTtXeinv49jMU4MQLvk6T8Pz0dincdincdincNquovAPNgdJ320sgAAAAASUVORK5CYII=",
-                "Face", 30.547075, -87.216621, "988");
-        PictionaryChallenge testchallenge3 = new PictionaryChallenge("iVBORw0KGgoAAAANSUhEUgAAAJMAAABqCAIAAAA3GvSTAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAEnQAABJ0Ad5mH3gAAATNSURBVHhe7Z27ceswEEUZOnTo8JWgEhwqdOjQoUN3oFAlKHQJClWGy1AJCv3ueO9wdiiKJmVigQX2ZPwJXB4CWPCn7jvwSSXmTqfTvx8+Pz85q3ZqMAdtj4+P3Q8PDw+NyHNvTmsTGpHn2xwMDbQJkMc16sWxud1uR1E/vL+/7/d7TnSV9N8TuIxQ8hEq+gHaZBGnw1yBDFrI7XZ7uVy4LMwVy6CFfH191doAF3Rd9UmKG3MTLaQGuYksrT5JcWPu6elJlIBBC6lpJ0lxEB7aPV3brlvIAVwvzOXlumPjgttw1TCXkV/zkVG4dpjLhdY20bFdw23CXBYOhwMP/0JtgJuFuSz0meRSbUA2BJyulBLD0+3kUm2AW4Y5Y7S2OZnkNdw4zFlyd1ai4fZhzobBxa27tQH+RJgzYHBf+y/aAH8lzKVmoG3mcHsC/lCYS8pA2+jlfzC4dDkTblwpmcPTdwBWh2VUSubw+ttpKWAZlZI5PH07bZr5/R83CHPuoLcw5w56C3PuoLcw5w56C3PuoLcw5w56C3PuoLcw5w56C3PuoLcw5w56C3PuoLcw5w56C3PuoLcw5w56C3PuoLcw5w56C3PuoLcw5w56C3O3uH5xeynY/HA48OfWg78e5m7xR21Lma+5fyqJ05Vyf3jzH/5JwYRI2bFbj27+kTlPfmIFg296rHZicq9nn+mXy+Xt7Y3b5ADH9+Pj43w+c4fGuO8JXWDwTY9s5haRXfMdcNeT4cPcgLwip5/85EphLh3H43Gz2XCnb7P0DRVuFubcwaMQ5tzBoxDm3MGjEOZ8oT/jwlnJWK2A/srFbrfjrPboXwe876sSi1jNHEa1stOgTXm6wi1KR+9jNXPY1+12yx3vuq+vLy5oBssKB9ZsjiHv+flZ9v7l5YVz2+B0OkngwKDCgZU7UlQ17n7X7fd7zm0A/cI7ZyVm/WL661LVf0lZIyGDRPcorlnfHNoKBtHSCIEBG4acpKQGRwgSL+B0epKUpEcIjfR2jNa7OT1CaKS3k2ABp9OTqiTI69vMFqqdRAo4nZ6EJfVtZgvVTiIFnE5PwpJ0tas+VZEwAafTk7akdlIVBlmNuXZSFYkRcDo9yUtqIVXRFy05Kz0WJelUxeARUnvsL1oCi5J0tauyzZTQgNlFS2B0jqCdZHDV5ZmWTzBo7AqrMs88n899c2JzQ7XHzlyVeSaaR4los9kgQM41wbSC6w7P5oWXpOh28ng8cq4VpuaAbjO917w+pURbwlmGWJtDtdMvc/jNVrDnjMHqwZMB1uYEXfM8ytPajBOTnjzmdLYCfMnT3RuiyFLhQB5zwKk8ZFX939Fk1AaymQMDecg2cTpzWZHo2gYyagM5zYGBPFDsIF0PuoHlha5RMpsDkDd4dbjMoV6fVdkPukfJb07AsdBndFFDvcE3e+wH3aOUYg7oq9JCCT2fTkkELshNQeYEPdQTcjWeKFRXNSF799ZTnLnrbg+g8YTR6a/OrMLEx8zKcSYUZ65nVGGK9nO0bmmWfljDhnLNCdedn/BHhb/aEsp0JpRuTpj51Zm1KK1hHMWHOWG0/VyFkuvWLTyZ61lFoUdbGpfmAhDmvBLmvBLmvBLmvBLmvBLmvBLmvBLmvBLmvBLmfPL9/R+lHID3E+/pLwAAAABJRU5ErkJggg==",
-                "Boat", 30.546784, -87.216664, "1028");
-        challenges.put(testchallenge.getId(), testchallenge);
-        challenges.put(testchallenge2.getId(), testchallenge2);
-        challenges.put(testchallenge3.getId(), testchallenge3);
-
-        if (!newImage.equals("") && !newSecretWord.equals("") && newChallengeLat != 0 && newChallengeLong != 0) {
-            PictionaryChallenge newChallenge = new PictionaryChallenge(newImage,
-                    newSecretWord, newChallengeLat, newChallengeLong, "77");
-            challenges.put(newChallenge.getId(), newChallenge);
-        }
+        ((App)this.getApplication()).getPictionaryCollection().find()
+        .projection(new Document().append("lat", 1).append("long", 1).append("picture", 1).append("secret_word", 1))
+        .forEach(document -> {
+            // Print documents to the log.
+//            Log.i(TAG, "Got document: " + document.toString());
+            PictionaryChallenge c = new PictionaryChallenge(document.get("picture").toString(),
+                    document.get("secret_word").toString(), Double.parseDouble(document.get("lat").toString()), Double.parseDouble(document.get("long").toString()), document.get("_id").toString());
+            challenges.put(c.getId(), c);
+        });
 
         // Build the Map
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()

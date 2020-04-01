@@ -37,7 +37,7 @@ public class PictionaryActivity extends AppCompatActivity implements OnItemSelec
     private PaintView paintView;
     private final Context c = this;
     /* DATABASE variables */
-    private RemoteMongoCollection<Document> pictionaryCollection;
+//    private RemoteMongoCollection<Document> pictionaryCollection;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,13 +106,6 @@ public class PictionaryActivity extends AppCompatActivity implements OnItemSelec
                     String imageEncoded = paintView.convertImageToBase64();
                     /* PLACEHOLDER: Once we have the database set up, we will want to push this data to the database rather than sending it as an extra*/
                     Intent myIntent = new Intent(getApplicationContext(), MapsActivity.class);
-                    Bundle bundle = new Bundle();
-                    /* Send the picture to the maps activity so it can display. Only necessary until we get the data being pulled from the database*/
-                    bundle.putString("new_image", imageEncoded);
-                    bundle.putString("new_secret_word", secretWord);
-                    bundle.putDouble("new_lat", getIntent().getExtras().getDouble("user_lat"));
-                    bundle.putDouble("new_long", getIntent().getExtras().getDouble("user_long"));
-                    myIntent.putExtras(bundle);
                     /* Insert the picture the user created into the database */
                     insertPictionaryChallengToDatabase(getIntent().getExtras().getDouble("user_lat"),getIntent().getExtras().getDouble("user_long"),secretWord,imageEncoded);
                     startActivityForResult(myIntent, 0);
@@ -123,8 +116,6 @@ public class PictionaryActivity extends AppCompatActivity implements OnItemSelec
             }
         });
 
-        /* Set up a connection to the pictionary_pins collection */
-        pictionaryCollection = ((App)this.getApplication()).getMongoClient().getDatabase("GameGeo").getCollection("pictionary_pins");
     }
     /*
         Method for the back button
@@ -201,7 +192,7 @@ public class PictionaryActivity extends AppCompatActivity implements OnItemSelec
                 .append("picture", picture);
 
 
-        final Task<RemoteInsertOneResult> insertTask = pictionaryCollection.insertOne(newItem);
+        final Task<RemoteInsertOneResult> insertTask = ((App)this.getApplication()).getPictionaryCollection().insertOne(newItem);
         insertTask.addOnCompleteListener(new OnCompleteListener<RemoteInsertOneResult>() {
             @Override
             public void onComplete(@NonNull Task <RemoteInsertOneResult> task) {

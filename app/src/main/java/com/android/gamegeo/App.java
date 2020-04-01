@@ -19,6 +19,8 @@ import org.bson.Document;
 public class App extends Application {
 //    public RemoteMongoCollection<Document> pictionaryCollection;
     public RemoteMongoClient mongoClient;
+    public RemoteMongoCollection<Document> pictionaryCollection;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -42,9 +44,14 @@ public class App extends Application {
 
         mongoClient =
                 stitchAppClient.getServiceClient(RemoteMongoClient.factory, "mongodb-atlas");
+        pictionaryCollection = mongoClient.getDatabase("GameGeo").getCollection("pictionary_pins");
     }
 
     public RemoteMongoClient getMongoClient() {
         return mongoClient;
+    }
+
+    public RemoteMongoCollection<Document> getPictionaryCollection() {
+        return pictionaryCollection;
     }
 }
