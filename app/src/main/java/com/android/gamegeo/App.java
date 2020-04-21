@@ -25,11 +25,11 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
 
-    Stitch.initializeDefaultAppClient(getResources().getString(R.string.my_app_id));
-    final StitchAppClient stitchAppClient = Stitch.getDefaultAppClient();
-//        final StitchAppClient stitchAppClient =
-//                Stitch.initializeDefaultAppClient(getResources().getString(R.string.my_app_id));
-    stitchAppClient.getAuth().loginWithCredential(new AnonymousCredential())
+        Stitch.initializeDefaultAppClient(getResources().getString(R.string.my_app_id));
+        final StitchAppClient stitchAppClient = Stitch.getDefaultAppClient();
+    //        final StitchAppClient stitchAppClient =
+    //                Stitch.initializeDefaultAppClient(getResources().getString(R.string.my_app_id));
+        stitchAppClient.getAuth().loginWithCredential(new AnonymousCredential())
             .addOnCompleteListener(new OnCompleteListener<StitchUser>() {
                 @Override
                 public void onComplete(@NonNull Task<StitchUser> task) {
