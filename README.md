@@ -19,33 +19,32 @@ Application Code
 ```
 ## gradle/wrapper: 
 ### gradle-wrapper.jar, gradle-wrapper.properties
-```
-```
-## .gitignore	
+## Auto Generated Files
+### .gitignore	
 ```
 Generated
 ```
-## README.md	
+### README.md	
 ```
 File Overview
 ```
-## build.gradle	
+### build.gradle	
 ```
 Generated
 ```
-## gradle.properties	
+### gradle.properties	
 ```
 Generated
 ```
-## gradlew	Initial 
+### gradlew	Initial 
 ```
 Generated
 ```
-## gradlew.bat	Initial
+### gradlew.bat	Initial
 ```
 Generated
 ```
-## settings.gradle	Initial
+### settings.gradle	Initial
 ```
 Generated
 ```
