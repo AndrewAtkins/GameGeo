@@ -9,9 +9,9 @@ Required documentation to submit such as Project Report and Manuals
 ```
 Project specific settings
 ```
-## app: src(androidTest/java/com/android/gamegeo, debug/res/values,release/res/values,test/java/com/android/gamegeo), .gitignore, build.gradle, proguard-rules.pro
+## app: src, .gitignore, build.gradle, proguard-rules.pro
 ```
-Application related Source Code
+Application Code
 ```
 ## gradle/wrapper: gradle-wrapper.jar, gradle-wrapper.properties
 ```
