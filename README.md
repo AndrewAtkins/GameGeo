@@ -1,4 +1,4 @@
 # GameGeo
- .idea: Added dependencies and stitch app ID to string resources
- app: Application related source code 
- Project Report 
+ .idea: Added dependencies and stitch app ID to string resources<br />
+ app: Application related source code <br />
+ Project Report <br />
