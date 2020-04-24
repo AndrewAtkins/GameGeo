@@ -1,7 +1,7 @@
 # GameGeo
 ## Project_Submission(ProjectReport.doc)
 ```
-Required documentation 
+Required documentation to submit such as Project Report and Manuals 
 ```
 
 ## .idea(codeStyles, .name, encodings.xml, gradle.xml, misc.xml, runConfigurations.xml, vcs.xml)
