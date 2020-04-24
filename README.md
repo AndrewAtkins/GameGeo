@@ -12,9 +12,8 @@ Project specific settings
 Application related Source Code
 ```
 ## gradle/wrapper: gradle-wrapper.jar, gradle-wrapper.properties
-'''
-Generated wrapper properties 
-'''
+```
+```
 ## .gitignore	
 ```
 Generated
