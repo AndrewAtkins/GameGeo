@@ -1,6 +1,4 @@
 ![unknown.png](https://github.com/AndrewAtkins/GameGeo/blob/master/unknown.png)
-[Contribution guidelines for this project](docs/CONTRIBUTING.md)
-
 # GameGeo
 ## Project_Submission:
 ### [ProjectReport.doc](Project_Submission/ProjectReport.doc)
