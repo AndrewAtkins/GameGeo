@@ -6,7 +6,14 @@
 ```
 Final Project Report 
 ```
-
+### UserManual.doc
+```
+User / Administrator Manual 
+```
+### Deployment.doc
+```
+Deployment / Installation Instructions
+```
 ## .idea: 
 ### codeStyles, .name, encodings.xml, gradle.xml, misc.xml, runConfigurations.xml, vcs.xml
 ```
