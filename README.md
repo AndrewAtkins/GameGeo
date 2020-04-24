@@ -1,7 +1,7 @@
 ![unknown.png](https://github.com/AndrewAtkins/GameGeo/blob/master/unknown.png)
 # GameGeo
 ## Project_Submission:
-### [ProjectReport.doc](Project_Submission/ProjectReport.doc)
+### [ProjectReport.doc](Final_Submission/ProjectReport.doc)
 ```
 Final Project Report 
 ```
