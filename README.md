@@ -1,13 +1,18 @@
 # GameGeo
-## .idea 
-.idea: Added dependencies and stitch app ID to string resources<br />
-## app
+## Project_Submission(ProjectReport.doc)
 ```
-app(src(androidTest/java/com/android/gamegeo, debug/res/values,release/res/values,test/java/com/android/gamegeo), .gitignore, build.gradle, proguard-rules.pro) <br />
+Required documentation <br />
 ```
-```
-Project_Submission(Project Report, Manuals) <br />
 
+## .idea(codeStyles, .name, encodings.xml, gradle.xml, misc.xml, runConfigurations.xml, vcs.xml)
 ```
-.gitignore,build.gradle, proguard-rules.pro
+Added dependencies and stitch app ID to string resources<br />
+```
+
+## app(src(androidTest/java/com/android/gamegeo, debug/res/values,release/res/values,test/java/com/android/gamegeo), .gitignore, build.gradle, proguard-rules.pro) <br />
+```
+Application related Source Code
+```
+
+
  
