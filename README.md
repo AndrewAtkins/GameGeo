@@ -16,5 +16,5 @@ Application related Source Code
 
 
  
-![GameGeo Logo]
+![unknown.png]
 (https://github.com/AndrewAtkins/GameGeo/blob/master/unknown.png)
