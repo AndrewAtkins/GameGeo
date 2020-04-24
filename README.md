@@ -1,6 +1,6 @@
-# GameGeo 
 ![unknown.png](https://github.com/AndrewAtkins/GameGeo/blob/master/unknown.png)
 
+# GameGeo 
 ## Project_Submission: ProjectReport.doc
 ```
 Required documentation to submit such as Project Report and Manuals 
