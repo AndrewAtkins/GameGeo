@@ -7,15 +7,18 @@
 Final Project Report 
 ```
 
-## .idea: codeStyles, .name, encodings.xml, gradle.xml, misc.xml, runConfigurations.xml, vcs.xml
+## .idea: 
+### codeStyles, .name, encodings.xml, gradle.xml, misc.xml, runConfigurations.xml, vcs.xml
 ```
 Project specific settings
 ```
-## app: src, .gitignore, build.gradle, proguard-rules.pro
+## app: 
+### src, .gitignore, build.gradle, proguard-rules.pro
 ```
 Application Code
 ```
-## gradle/wrapper: gradle-wrapper.jar, gradle-wrapper.properties
+## gradle/wrapper: 
+### gradle-wrapper.jar, gradle-wrapper.properties
 ```
 ```
 ## .gitignore	
