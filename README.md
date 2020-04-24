@@ -16,31 +16,31 @@ Application related Source Code
 Generated wrapper properties 
 '''
 ## .gitignore	
-'''
+```
 Generated
-'''
+```
 ## README.md	
-'''
+```
 File Overview
-'''
+```
 ## build.gradle	
-'''
+```
 Generated
-'''
+```
 ## gradle.properties	
-'''
+```
 Generated
-'''
+```
 ## gradlew	Initial 
-'''
+```
 Generated
-'''
+```
 ## gradlew.bat	Initial
-'''
+```
 Generated
-'''
+```
 ## settings.gradle	Initial
-'''
+```
 Generated
-'''
+```
 ![unknown.png](https://github.com/AndrewAtkins/GameGeo/blob/master/unknown.png)
