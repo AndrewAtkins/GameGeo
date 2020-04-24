@@ -1,6 +1,6 @@
 ![unknown.png](https://github.com/AndrewAtkins/GameGeo/blob/master/unknown.png)
 
-# GameGeo 
+# ~ GameGeo
 ## Project_Submission
 ### ProjectReport.doc
 ```
@@ -19,7 +19,7 @@ Application Code
 ```
 ## gradle/wrapper: 
 ### gradle-wrapper.jar, gradle-wrapper.properties
-## Auto Generated Files
+## == Auto Generated Files ==
 ### .gitignore	
 ```
 Generated
