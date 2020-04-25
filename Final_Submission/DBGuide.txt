@@ -1,0 +1,14 @@
+Our database is hosted on MongoDB atlas.
+
+An invite code has been sent to the email address: bowsnickiklewe@uwf.edu
+
+Under Project0 -> Cluster0 the database GameGeo can be found.
+In the GameGeo database exists the collection pictionary_pins. The data stored in each pictionary pin is the following:
+
+_id: a unique identifier for the record
+lat: a double representing the latitude location of the challenge
+long: a double representing the longitude location of the challenge
+secret_word: a string representing the secret word that identifies the image
+picture: a base64 encoded string that represents the image
+
+The data in this collection is updated by the application whenever a user creates a new pictionary challenge.
