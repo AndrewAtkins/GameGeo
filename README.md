@@ -17,6 +17,10 @@ Deployment / Installation Instructions
 ```
 Exported android application used to install Game Geo. Refer to InstallationManual.doc for how to use.
 ```
+### DBGuide.txt
+```
+A guide with instructions on accessing and navigating our database.
+```
 ## .idea: 
 ### codeStyles, .name, encodings.xml, gradle.xml, misc.xml, runConfigurations.xml, vcs.xml
 ```
