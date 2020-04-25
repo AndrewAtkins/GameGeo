@@ -9,9 +9,13 @@ Final Project Report
 ```
 User / Administrator Manual 
 ```
-### Deployment.doc
+### InstallationManual.doc
 ```
 Deployment / Installation Instructions
+```
+### app-debug.apk
+```
+Exported android application used to install Game Geo. Refer to InstallationManual.doc for how to use.
 ```
 ## .idea: 
 ### codeStyles, .name, encodings.xml, gradle.xml, misc.xml, runConfigurations.xml, vcs.xml
